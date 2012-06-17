@@ -1,8 +1,8 @@
 #!/bin/bash
 
-. ./common
-
 shopt -s extglob
+
+. ./common
 
 write_source() {
   local tag= spec= label= uuid= comment=()
@@ -36,6 +36,24 @@ write_source() {
 }
 
 root=/mnt
+
+usage() {
+  cat <<EOF
+usage: ${0##*/} [options]
+
+  Options:
+    -r root        Generate based on 'root' (default: /mnt)
+    -U             Use UUIDs for source identifiers
+    -L             Use labels for source identifiers
+
+EOF
+}
+
+if [[ -z $1 || $1 = @(-h|--help) ]]; then
+  usage
+  exit $(( $# ? 0 : 1 ))
+fi
+
 
 while getopts ':LUr:' flag; do
   case $flag in

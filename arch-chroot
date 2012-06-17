@@ -4,10 +4,18 @@ shopt -s extglob
 
 . ./common
 
+usage() {
+  cat <<EOF
+usage: ${0##*/} <chroot-dir>
+
+EOF
+}
+
 if [[ -z $1 || $1 = @(-h|--help) ]]; then
-  printf 'usage: %s <chroot dir>\n' "${0##*/}"
+  usage
   exit $(( $# ? 0 : 1 ))
 fi
+
 
 [[ -d $1 ]] || die "Can't create chroot on non-directory %s" "$1"
 

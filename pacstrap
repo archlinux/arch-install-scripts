@@ -8,9 +8,26 @@
 #  4) A valid mirror appears in /etc/pacman.d/mirrorlist
 #
 
+shopt -s extglob
+
 source ./common
 
 declare newroot=/mnt
+
+usage() {
+  cat <<EOF
+usage: ${0##*/} [options]
+
+  Options:
+    -r root        Install to 'root' (default: /mnt)
+
+EOF
+}
+
+if [[ -z $1 || $1 = @(-h|--help) ]]; then
+  usage
+  exit $(( $# ? 0 : 1 ))
+fi
 
 while getopts ':r:' flag; do
   case $flag in
