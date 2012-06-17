@@ -34,7 +34,7 @@ rootdev=$(findmnt -runo SOURCE "$newroot") || die '%s is not a mountpoint!' "$ne
 
 # create obligatory directories
 msg 'Creating install root at %s' "$newroot"
-mkdir -p "$newroot/var/lib/pacman" /mnt/{dev,proc,sys,run,tmp,etc}
+mkdir -p "$newroot/var/lib/pacman" "/$newroot"/{dev,proc,sys,run,tmp,etc}
 
 # mount API filesystems
 api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
