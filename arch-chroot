@@ -1,0 +1,20 @@
+#!/bin/bash
+
+shopt -s extglob
+
+. ./common
+
+if [[ -z $1 || $1 = @(-h|--help) ]]; then
+  printf 'usage: %s <chroot dir>\n' "${0##*/}"
+  exit $(( $# ? 0 : 1 ))
+fi
+
+[[ -d $1 ]] || die "Can't create chroot on non-directory %s" "$1"
+
+if ! api_fs_mount "$1"; then
+  api_fs_umount 2>/dev/null
+  die "failed to setup API filesystems in chroot %s" "$1"
+fi
+
+chroot "$@"
+api_fs_umount "$1"
