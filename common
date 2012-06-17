@@ -14,6 +14,7 @@ in_array() {
 }
 
 api_fs_mount() {
+  mount -B "$1" "$1"
   mount -t proc proc "$1/proc" -o nosuid,noexec,nodev || return 1
   mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev || return 1
   mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid || return 1
@@ -31,7 +32,8 @@ api_fs_umount() {
     "$1/dev/pts" \
     "$1/dev" \
     "$1/sys" \
-    "$1/proc"
+    "$1/proc" \
+    "$1"
 }
 
 fstype_is_pseudofs() {
