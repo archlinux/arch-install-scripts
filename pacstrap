@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#
+# Assumptions:
+#  1) User has partitioned, formatted, and mounted partitions on /mnt
+#  2) Network is functional
+#  3) Arguments passed to the script are valid pacman targets
+#  4) A valid mirror appears in /etc/pacman.d/mirrorlist
+#
+
+source ./common
+
+declare newroot=/mnt
+
+while getopts ':r:' flag; do
+  case $flag in
+    r)
+      newroot=$OPTARG
+      ;;
+    ?)
+      die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
+      ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+
+if (( $# )); then
+  packages=("$@")
+else
+  packages=('base' 'base-devel')
+fi
+
+rootdev=$(findmnt -runo SOURCE "$newroot") || die '%s is not a mountpoint!' "$newroot"
+
+# create obligatory directories
+msg 'Creating install root at %s' "$newroot"
+mkdir -p "$newroot/var/lib/pacman" /mnt/{dev,proc,sys,run,tmp,etc}
+
+# mount API filesystems
+api_fs_mount "$newroot"
+
+msg 'Installing packages to %s' "$newroot"
+pacman -r "$newroot" -Sy "${package[@]}"
+
+api_fs_mount "$newroot"

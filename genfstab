@@ -1,0 +1,94 @@
+#!/bin/bash
+
+. ./common
+
+shopt -s extglob
+
+write_source() {
+  local tag= spec=
+
+  if (( bylabel )); then
+    tag=LABEL
+    spec=$(lsblk -rno LABEL "$1" 2>/dev/null)
+  elif (( byuuid )); then
+    tag=UUID
+    spec=$(lsblk -rno UUID "$1" 2>/dev/null)
+  fi
+
+  if [[ $spec ]]; then
+    printf '# %s\n' "$source"
+    printf '%-20s' "$tag=$spec"
+  else
+    printf '%-20s' "$source"
+  fi
+}
+
+root=/mnt
+
+while getopts ':LUr:' flag; do
+  case $flag in
+    L)
+      bylabel=1
+      ;;
+    U)
+      byuuid=1
+      ;;
+    r)
+      # trim trailing slashes
+      root=${OPTARG%%+(/)}
+      ;;
+    ?)
+      die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
+      ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+
+if (( bylabel && byuuid )); then
+  die "cannot specify both -U and -L"
+fi
+
+# handle block devices
+findmnt -Recvruno SOURCE,TARGET,FSTYPE,VFS-OPTIONS "$root" |
+    while read -r source target fstype opts; do
+  # default 5th and 6th columns
+  dump=0 pass=2
+
+  # this is root
+  target=${target#$root}
+  if [[ $target = ?(/) ]]; then
+    target=/
+    pass=1
+  fi
+
+  # we don't fsck pseudofs
+  if fstype_is_pseudofs "$fstype"; then
+    continue
+    pass=0
+  fi
+
+  # write one line
+  write_source "$source"
+  printf '\t%-10s' "$target" "$fstype" "$opts"
+  printf '\t%s %s' "$dump" "$pass"
+  printf '\n\n'
+done
+
+# handle swaps devices
+{
+  # ignore header
+  read
+
+  while read -r device _ _ _ prio; do
+    options=defaults
+    if [[ $prio != -1 ]]; then
+      options+=,pri=$prio
+    fi
+
+    printf -v device '%b' "$device"
+
+    printf '%-20s\t%-10s\t%-10s\t%-10s\t0 0\n' "$device" 'none' 'swap' "$options"
+  done
+} </proc/swaps
+
+# vim: et ts=2 sw=2 ft=sh :

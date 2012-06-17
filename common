@@ -1,0 +1,71 @@
+#!/bin/bash
+
+out() { printf "$1 $2\n" "${@:3}"; }
+error() { out "==> ERROR:" "$@"; }
+msg() { out "==>" "$@"; }
+msg2() { out "  ->" "$@";}
+die() { error "$@"; exit 1; }
+
+in_array() {
+  local i
+  for i in "${@:2}"; do
+    [[ $1 = "$i" ]] && return
+  done
+}
+
+api_fs_mount() {
+  mount -t proc proc "$1/proc" -o nosuid,noexec,nodev || return 1
+  mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev || return 1
+  mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid || return 1
+  mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec || return 1
+  mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev || return 1
+  mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 || return 1
+  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M || return 1
+}
+
+api_fs_umount() {
+  umount \
+    "$1/tmp" \
+    "$1/run" \
+    "$1/dev/shm" \
+    "$1/dev/pts" \
+    "$1/dev" \
+    "$1/sys" \
+    "$1/proc"
+}
+
+fstype_is_pseudofs() {
+  # list taken from util-linux source: libmount/src/utils.c
+  local pseudofs_types=('anon_inodefs'
+                        'autofs'
+                        'bdev'
+                        'binfmt_misc'
+                        'cgroup'
+                        'configfs'
+                        'cpuset'
+                        'debugfs'
+                        'devfs'
+                        'devpts'
+                        'devtmpfs'
+                        'dlmfs'
+                        'fuse.gvfs-fuse-daemon'
+                        'fusectl'
+                        'hugetlbfs'
+                        'mqueue'
+                        'nfsd'
+                        'none'
+                        'pipefs'
+                        'proc'
+                        'pstore'
+                        'ramfs'
+                        'rootfs'
+                        'rpc_pipefs'
+                        'securityfs'
+                        'sockfs'
+                        'spufs'
+                        'sysfs'
+                        'tmpfs')
+
+  in_array "$1" "${pseudofs_types[@]}"
+}
+
