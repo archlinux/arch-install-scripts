@@ -43,6 +43,6 @@ api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
 trap 'api_fs_umount "$newroot"' EXIT
 
 msg 'Installing packages to %s' "$newroot"
-pacman -r "$newroot" -Sy "${packages[@]}"
+pacman -r "$newroot" -Sy --noconfirm "${packages[@]}"
 
 # vim: et ts=2 sw=2 ft=sh:
