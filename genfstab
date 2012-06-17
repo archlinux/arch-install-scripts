@@ -5,7 +5,7 @@
 shopt -s extglob
 
 write_source() {
-  local tag= spec= label= uuid= comment=
+  local tag= spec= label= uuid= comment=()
 
   label=$(lsblk -rno LABEL "$1" 2>/dev/null)
   uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
@@ -13,24 +13,20 @@ write_source() {
   if (( bylabel )); then
     tag=LABEL
     spec=$label
-    comment="$source UUID=$uuid"
+    comment=("$source" "UUID=$uuid")
   elif (( byuuid )); then
     tag=UUID
     spec=$uuid
+    comment=("$source")
     if [[ $label ]]; then
-      comment="$source LABEL=$label"
-    else
-      comment="$source"
+      comment+=("LABEL=$label")
     fi
   else
-    if [[ $label ]]; then
-      comment="UUID=$uuid LABEL=$label"
-    else
-      comment="UUID=$uuid"
-    fi
+    [[ $uuid ]] && comment+=("UUID=$uuid")
+    [[ $label ]] && comment+=("LABEL=$label")
   fi
 
-  printf '# %s\n' "$comment"
+  [[ $comment ]] && printf '# %s\n' "${comment[*]}"
 
   if [[ $spec ]]; then
     printf '%-20s' "$tag=$spec"
@@ -79,7 +75,6 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,VFS-OPTIONS "$root" |
 
   # we don't fsck pseudofs
   if fstype_is_pseudofs "$fstype"; then
-    continue
     pass=0
   fi
 
