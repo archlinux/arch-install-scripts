@@ -5,18 +5,34 @@
 shopt -s extglob
 
 write_source() {
-  local tag= spec=
+  local tag= spec= label= uuid= comment=
+
+  label=$(lsblk -rno LABEL "$1" 2>/dev/null)
+  uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
 
   if (( bylabel )); then
     tag=LABEL
-    spec=$(lsblk -rno LABEL "$1" 2>/dev/null)
+    spec=$label
+    comment="$source UUID=$uuid"
   elif (( byuuid )); then
     tag=UUID
-    spec=$(lsblk -rno UUID "$1" 2>/dev/null)
+    spec=$uuid
+    if [[ $label ]]; then
+      comment="$source LABEL=$label"
+    else
+      comment="$source"
+    fi
+  else
+    if [[ $label ]]; then
+      comment="UUID=$uuid LABEL=$label"
+    else
+      comment="UUID=$uuid"
+    fi
   fi
 
+  printf '# %s\n' "$comment"
+
   if [[ $spec ]]; then
-    printf '# %s\n' "$source"
     printf '%-20s' "$tag=$spec"
   else
     printf '%-20s' "$source"
