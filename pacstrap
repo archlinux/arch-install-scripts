@@ -37,9 +37,11 @@ msg 'Creating install root at %s' "$newroot"
 mkdir -p "$newroot/var/lib/pacman" /mnt/{dev,proc,sys,run,tmp,etc}
 
 # mount API filesystems
-api_fs_mount "$newroot"
+api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
+
+# always call umount on quit after this point
+trap 'api_fs_umount "$newroot"' EXIT
 
 msg 'Installing packages to %s' "$newroot"
 pacman -r "$newroot" -Sy "${package[@]}"
 
-api_fs_mount "$newroot"
