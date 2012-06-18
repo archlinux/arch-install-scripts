@@ -70,6 +70,9 @@ while getopts ':Lpr:U' flag; do
       # trim trailing slashes
       root=${OPTARG%%+(/)}
       ;;
+    :)
+      die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
+      ;;
     ?)
       die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
       ;;
