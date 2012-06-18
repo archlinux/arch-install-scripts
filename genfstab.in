@@ -2,7 +2,7 @@
 
 shopt -s extglob
 
-. ./common
+m4_include(common)
 
 # we need this because %q isn't the opposite of %b
 mangle() {

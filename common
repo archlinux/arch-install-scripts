@@ -1,5 +1,3 @@
-#!/bin/bash
-
 out() { printf "$1 $2\n" "${@:3}"; }
 error() { out "==> ERROR:" "$@"; }
 msg() { out "==>" "$@"; }
@@ -71,7 +69,6 @@ fstype_is_pseudofs() {
                         'spufs'
                         'sysfs'
                         'tmpfs')
-
   in_array "$1" "${pseudofs_types[@]}"
 }
 

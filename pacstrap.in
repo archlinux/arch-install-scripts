@@ -10,7 +10,7 @@
 
 shopt -s extglob
 
-source ./common
+m4_include(common)
 
 declare newroot=/mnt
 

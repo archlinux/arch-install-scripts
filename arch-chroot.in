@@ -2,7 +2,7 @@
 
 shopt -s extglob
 
-. ./common
+m4_include(common)
 
 usage() {
   cat <<EOF

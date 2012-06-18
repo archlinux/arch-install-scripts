@@ -1,0 +1,5 @@
+*~
+arch-chroot
+genfstab
+pacstrap
+arch-install-scripts-*.tar.gz*
