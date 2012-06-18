@@ -79,7 +79,7 @@ if (( bylabel && byuuid )); then
 fi
 
 # handle block devices
-findmnt -Recvruno SOURCE,TARGET,FSTYPE,VFS-OPTIONS "$root" |
+findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
     while read -r source target fstype opts; do
   # default 5th and 6th columns
   dump=0 pass=2
@@ -94,6 +94,12 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,VFS-OPTIONS "$root" |
   # we don't fsck pseudofs
   if fstype_is_pseudofs "$fstype"; then
     pass=0
+  fi
+
+  if [[ $source =~ ^(/.+)\[(.+)\]$ ]]; then
+    # it's a bind mount
+    source=$(findmnt -funcrevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
+    fstype=bind
   fi
 
   # write one line
