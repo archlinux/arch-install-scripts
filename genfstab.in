@@ -124,15 +124,19 @@ done
   # ignore header
   read
 
-  while read -r device _ _ _ prio; do
+  while read -r device type _ _ prio; do
     options=defaults
     if [[ $prio != -1 ]]; then
       options+=,pri=$prio
     fi
 
-    printf -v device '%b' "$device"
+    if [[ $type = file ]]; then
+      printf '%-20s' "$device"
+    else
+      write_source "$(unmangle "$device")"
+    fi
 
-    printf '%-20s\t%-10s\t%-10s\t%-10s\t0 0\n' "$device" 'none' 'swap' "$options"
+    printf '\t%-10s\t%-10s\t%-10s\t0 0\n\n' 'none' 'swap' "$options"
   done
 } </proc/swaps
 
