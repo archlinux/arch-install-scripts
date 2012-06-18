@@ -19,12 +19,11 @@ fi
 
 [[ -d $1 ]] || die "Can't create chroot on non-directory %s" "$1"
 
-if ! api_fs_mount "$1"; then
-  api_fs_umount 2>/dev/null
-  die "failed to setup API filesystems in chroot %s" "$1"
-fi
+trap 'api_fs_umount "$1" 2>/dev/null' EXIT
+
+api_fs_mount "$1" || die "failed to setup API filesystems in chroot %s" "$1"
 mount -B /etc/resolv.conf "$1/etc/resolv.conf"
 
 chroot "$@"
+
 umount "$1/etc/resolv.conf"
-api_fs_umount "$1"
