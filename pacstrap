@@ -20,6 +20,7 @@ usage: ${0##*/} [options]
 
   Options:
     -r root        Install to 'root' (default: /mnt)
+    -d             Allow installation to a non-mountpoint directory
 
 EOF
 }
@@ -29,8 +30,11 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':r:' flag; do
+while getopts ':dr:' flag; do
   case $flag in
+    d)
+      directory=1
+      ;;
     r)
       newroot=$OPTARG
       ;;
@@ -47,7 +51,10 @@ else
   packages=('base' 'base-devel')
 fi
 
-rootdev=$(findmnt -runo SOURCE "$newroot") || die '%s is not a mountpoint!' "$newroot"
+[[ -d $newroot ]] || die "%s is not a directory" "$newroot"
+if ! mountpoint -q "$newroot" && (( ! directory )); then
+  die '%s is not a mountpoint!' "$newroot"
+fi
 
 # create obligatory directories
 msg 'Creating install root at %s' "$newroot"
