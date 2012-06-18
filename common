@@ -14,17 +14,20 @@ in_array() {
 }
 
 api_fs_mount() {
-  mount -B "$1" "$1"
-  mount -t proc proc "$1/proc" -o nosuid,noexec,nodev || return 1
-  mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev || return 1
-  mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid || return 1
-  mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec || return 1
-  mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev || return 1
-  mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 || return 1
-  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M || return 1
+  set -x
+  mount -B "$1" "$1" &&
+  mount -t proc proc "$1/proc" -o nosuid,noexec,nodev &&
+  mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev &&
+  mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid &&
+  mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec &&
+  mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev &&
+  mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 &&
+  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M &&
+  { set +x; } 2>/dev/null
 }
 
 api_fs_umount() {
+  set -x
   umount \
     "$1/tmp" \
     "$1/run" \
@@ -34,6 +37,7 @@ api_fs_umount() {
     "$1/sys" \
     "$1/proc" \
     "$1"
+  { set +x; } 2>/dev/null
 }
 
 fstype_is_pseudofs() {
