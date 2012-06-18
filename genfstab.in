@@ -42,9 +42,10 @@ usage() {
 usage: ${0##*/} [options]
 
   Options:
+    -L             Use labels for source identifiers
+    -p             Avoid printing pseudofs mounts
     -r root        Generate based on 'root' (default: /mnt)
     -U             Use UUIDs for source identifiers
-    -L             Use labels for source identifiers
 
 EOF
 }
@@ -54,14 +55,16 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-
-while getopts ':LUr:' flag; do
+while getopts ':Lpr:U' flag; do
   case $flag in
     L)
       bylabel=1
       ;;
     U)
       byuuid=1
+      ;;
+    p)
+      nopseudofs=1
       ;;
     r)
       # trim trailing slashes
@@ -96,6 +99,7 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
 
   # we don't fsck pseudofs
   if fstype_is_pseudofs "$fstype"; then
+    (( nopseudofs )) && continue
     pass=0
   fi
 
