@@ -23,6 +23,8 @@ if ! api_fs_mount "$1"; then
   api_fs_umount 2>/dev/null
   die "failed to setup API filesystems in chroot %s" "$1"
 fi
+mount -B /etc/resolv.conf "$1/etc/resolv.conf"
 
 chroot "$@"
+umount "$1/etc/resolv.conf"
 api_fs_umount "$1"
