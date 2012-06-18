@@ -4,26 +4,6 @@ shopt -s extglob
 
 m4_include(common)
 
-# we need this because %q isn't the opposite of %b
-mangle() {
-  local i= c= out=
-
-  for (( i = 0; i < ${#1}; i++ )); do
-    c=${1:i:1}
-    case $c in
-      [[:space:]])
-        printf -v c '%x' "'$c"
-        out+=\\x$c
-        ;;
-      *)
-        out+=$c
-        ;;
-    esac
-  done
-
-  printf '%s' "$out"
-}
-
 write_source() {
   local tag= spec= label= uuid= comment=()
 
@@ -104,9 +84,8 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
   # default 5th and 6th columns
   dump=0 pass=2
 
-  # unescape source and target
-  printf -v target '%b' "$target"
-  printf -v source '%b' "$source"
+  source=$(unmangle "$source")
+  target=$(unmangle "$target")
 
   # this is root
   target=${target#$root}
