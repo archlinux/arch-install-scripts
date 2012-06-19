@@ -70,6 +70,11 @@ trap 'api_fs_umount "$newroot" 2>/dev/null' EXIT
 api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
 
 msg 'Installing packages to %s' "$newroot"
-pacman -r "$newroot" -Sy --noconfirm "${packages[@]}"
+if ! pacman -r "$newroot" -Sy --noconfirm "${packages[@]}"; then
+  die 'Failed to install packages to new root'
+fi
+
+# if there's a keyring on the host, copy it into the new root
+[[ -d /etc/pacman.d/gnupg ]] && cp -a /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
 
 # vim: et ts=2 sw=2 ft=sh:
