@@ -81,4 +81,7 @@ if [[ -d /etc/pacman.d/gnupg && ! -d $newroot/etc/pacman.d/gnupg ]]; then
   cp -a /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
 fi
 
+# install the host's mirrorlist onto the new root
+cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
+
 # vim: et ts=2 sw=2 ft=sh:
