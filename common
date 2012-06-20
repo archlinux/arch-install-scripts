@@ -20,8 +20,9 @@ api_fs_mount() {
   mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec &&
   mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev &&
   mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 &&
-  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M &&
-  { set +x; } 2>/dev/null
+  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M
+  { ret=$?; set +x; } 2>/dev/null
+  return $ret
 }
 
 api_fs_umount() {
