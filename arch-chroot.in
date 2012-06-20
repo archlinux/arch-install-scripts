@@ -17,14 +17,15 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
 fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
+chrootdir=$1
 
-[[ -d $1 ]] || die "Can't create chroot on non-directory %s" "$1"
+[[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$1"
 
-trap 'api_fs_umount "$1" 2>/dev/null' EXIT
+trap 'api_fs_umount "$chrootdir" 2>/dev/null' EXIT
 
-api_fs_mount "$1" || die "failed to setup API filesystems in chroot %s" "$1"
-mount -B /etc/resolv.conf "$1/etc/resolv.conf"
+api_fs_mount "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$1"
+mount -B /etc/resolv.conf "$chrootdir/etc/resolv.conf"
 
 chroot "$@"
 
-umount "$1/etc/resolv.conf"
+umount "$chrootdir/etc/resolv.conf"
