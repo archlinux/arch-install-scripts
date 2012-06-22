@@ -12,7 +12,8 @@ shopt -s extglob
 
 m4_include(common)
 
-declare newroot=/mnt
+newroot=/mnt
+hostcache=1
 
 usage() {
   cat <<EOF
@@ -21,6 +22,7 @@ usage: ${0##*/} [options]
   Options:
     -r root        Install to 'root' (default: /mnt)
     -d             Allow installation to a non-mountpoint directory
+    -c             Use the package cache on the host, rather than the target
 
 EOF
 }
@@ -32,13 +34,16 @@ fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-while getopts ':dr:' flag; do
+while getopts ':cdr:' flag; do
   case $flag in
     d)
       directory=1
       ;;
     r)
       newroot=$OPTARG
+      ;;
+    c)
+      hostcache=0
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
@@ -51,9 +56,13 @@ done
 shift $(( OPTIND - 1 ))
 
 if (( $# )); then
-  packages=("$@")
+  pacman_args=("$@")
 else
-  packages=('base' 'base-devel')
+  pacman_args=('base' 'base-devel')
+fi
+
+if (( ! hostcache )); then
+  pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
 fi
 
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
@@ -72,7 +81,7 @@ trap 'api_fs_umount "$newroot" 2>/dev/null' EXIT
 api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
 
 msg 'Installing packages to %s' "$newroot"
-if ! pacman -r "$newroot" -Sy --noconfirm "${packages[@]}"; then
+if ! pacman -r "$newroot" -Sy --noconfirm "${pacman_args[@]}"; then
   die 'Failed to install packages to new root'
 fi
 
