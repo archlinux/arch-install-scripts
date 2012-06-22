@@ -12,8 +12,9 @@ in_array() {
 }
 
 api_fs_mount() {
-  set -x
-  mount -B "$1" "$1" &&
+  if ! mountpoint -q "$1"; then
+    mount -B "$1" "$1" && ROOT_IS_BIND=1
+  fi &&
   mount -t proc proc "$1/proc" -o nosuid,noexec,nodev &&
   mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev &&
   mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid &&
@@ -21,12 +22,9 @@ api_fs_mount() {
   mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev &&
   mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 &&
   mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M
-  { ret=$?; set +x; } 2>/dev/null
-  return $ret
 }
 
 api_fs_umount() {
-  set -x
   umount \
     "$1/tmp" \
     "$1/run" \
@@ -34,9 +32,9 @@ api_fs_umount() {
     "$1/dev/pts" \
     "$1/dev" \
     "$1/sys" \
-    "$1/proc" \
-    "$1"
-  { set +x; } 2>/dev/null
+    "$1/proc"
+
+  (( ROOT_IS_BIND )) && umount "$1"
 }
 
 valid_number_of_base() {
