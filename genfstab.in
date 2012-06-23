@@ -7,8 +7,8 @@ m4_include(common)
 write_source() {
   local tag= spec= label= uuid= comment=()
 
-  label=$(lsblk -rno LABEL "$1" 2>/dev/null)
-  uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
+  label=$(blkid -s LABEL -o value "$1" 2>/dev/null)
+  uuid=$(blkid -s UUID -o value "$1" 2>/dev/null)
 
   if (( bylabel )); then
     tag=LABEL
