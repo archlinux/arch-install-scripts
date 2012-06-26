@@ -1,5 +1,5 @@
 out() { printf "$1 $2\n" "${@:3}"; }
-error() { out "==> ERROR:" "$@"; }
+error() { out "==> ERROR:" "$@"; } >&2
 msg() { out "==>" "$@"; }
 msg2() { out "  ->" "$@";}
 die() { error "$@"; exit 1; }
