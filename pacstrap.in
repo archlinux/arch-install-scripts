@@ -13,7 +13,7 @@ shopt -s extglob
 m4_include(common)
 
 newroot=/mnt
-hostcache=1
+hostcache=0
 
 usage() {
   cat <<EOF
@@ -43,7 +43,7 @@ while getopts ':cdr:' flag; do
       newroot=$OPTARG
       ;;
     c)
-      hostcache=0
+      hostcache=1
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
