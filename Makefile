@@ -1,4 +1,4 @@
-V=20120618
+V=1
 
 PREFIX = /usr/local
 
@@ -27,7 +27,7 @@ uninstall:
 	for f in ${BINPROGS}; do $(RM) $(DESTDIR)$(PREFIX)/bin/$$f; done
 
 dist:
-	git archive --format=tar --prefix=arch-install-scripts-$(V)/ $(V) | gzip -9 > arch-install-scripts-$(V).tar.gz
+	git archive --format=tar --prefix=arch-install-scripts-$(V)/ v$(V) | gzip -9 > arch-install-scripts-$(V).tar.gz
 	gpg --detach-sign --use-agent arch-install-scripts-$(V).tar.gz
 
 .PHONY: all clean install uninstall dist
