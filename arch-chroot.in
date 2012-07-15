@@ -6,7 +6,7 @@ m4_include(common)
 
 usage() {
   cat <<EOF
-usage: ${0##*/} <chroot-dir>
+usage: ${0##*/} chroot-dir
 
 EOF
 }

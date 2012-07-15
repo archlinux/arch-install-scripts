@@ -39,13 +39,15 @@ root=/mnt
 
 usage() {
   cat <<EOF
-usage: ${0##*/} [options]
+usage: ${0##*/} root [options]
 
   Options:
     -L             Use labels for source identifiers
     -p             Avoid printing pseudofs mounts
-    -r root        Generate based on 'root' (default: /mnt)
     -U             Use UUIDs for source identifiers
+
+genfstab generates output suitable for addition to an fstab file based on the
+devices mounted under the mountpoint specified by the given root.
 
 EOF
 }
@@ -55,7 +57,7 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':Lpr:U' flag; do
+while getopts ':LpU' flag; do
   case $flag in
     L)
       bylabel=1
@@ -66,10 +68,6 @@ while getopts ':Lpr:U' flag; do
     p)
       nopseudofs=1
       ;;
-    r)
-      # trim trailing slashes
-      root=${OPTARG%%+(/)}
-      ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
       ;;
@@ -79,6 +77,13 @@ while getopts ':Lpr:U' flag; do
   esac
 done
 shift $(( OPTIND - 1 ))
+
+(( $# )) || die "No root directory specified"
+root=${1%%+(/)}; shift
+
+if ! mountpoint -q "$root"; then
+  die "$root is not a mountpoint"
+fi
 
 if (( bylabel && byuuid )); then
   die "cannot specify both -U and -L"

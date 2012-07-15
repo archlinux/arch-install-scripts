@@ -17,12 +17,14 @@ hostcache=0
 
 usage() {
   cat <<EOF
-usage: ${0##*/} [options]
+usage: ${0##*/} [options] root [packages...]
 
   Options:
-    -r root        Install to 'root' (default: /mnt)
-    -d             Allow installation to a non-mountpoint directory
     -c             Use the package cache on the host, rather than the target
+    -d             Allow installation to a non-mountpoint directory
+
+pacstrap installs packages to the specified new root directory. If no packages
+are given, pacstrap defaults to the "base" group.
 
 EOF
 }
@@ -34,13 +36,10 @@ fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-while getopts ':cdr:' flag; do
+while getopts ':cd' flag; do
   case $flag in
     d)
       directory=1
-      ;;
-    r)
-      newroot=$OPTARG
       ;;
     c)
       hostcache=1
@@ -55,11 +54,9 @@ while getopts ':cdr:' flag; do
 done
 shift $(( OPTIND - 1 ))
 
-if (( $# )); then
-  pacman_args=("$@")
-else
-  pacman_args=('base' 'base-devel')
-fi
+(( $# )) || die "No root directory specified"
+newroot=$1; shift
+pacman_args=("${@:-base}")
 
 if (( ! hostcache )); then
   pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
