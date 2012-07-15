@@ -19,7 +19,7 @@ all: $(BINPROGS)
 clean:
 	$(RM) $(BINPROGS)
 
-install:
+install: all
 	install -dm755 $(DESTDIR)$(PREFIX)/bin
 	install -m755 ${BINPROGS} $(DESTDIR)$(PREFIX)/bin
 
