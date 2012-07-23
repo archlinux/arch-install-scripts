@@ -5,7 +5,7 @@ shopt -s extglob
 m4_include(common)
 
 write_source() {
-  local tag= spec= label= uuid= comment=()
+  local src=$1 tag= spec= label= uuid= comment=()
 
   label=$(blkid -s LABEL -o value "$1" 2>/dev/null)
   uuid=$(blkid -s UUID -o value "$1" 2>/dev/null)
@@ -13,11 +13,11 @@ write_source() {
   if (( bylabel )); then
     tag=LABEL
     spec=$label
-    comment=("$source" "UUID=$uuid")
+    comment=("$src" "UUID=$uuid")
   elif (( byuuid )); then
     tag=UUID
     spec=$uuid
-    comment=("$source")
+    comment=("$src")
     if [[ $label ]]; then
       comment+=("LABEL=$label")
     fi
@@ -31,7 +31,7 @@ write_source() {
   if [[ $spec ]]; then
     printf '%-20s' "$tag=$spec"
   else
-    printf '%-20s' "$(mangle "$source")"
+    printf '%-20s' "$(mangle "$src")"
   fi
 }
 
