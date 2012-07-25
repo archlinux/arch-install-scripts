@@ -1,4 +1,4 @@
-V=1
+V=3
 
 PREFIX = /usr/local
 
