@@ -22,6 +22,7 @@ usage: ${0##*/} [options] root [packages...]
   Options:
     -c             Use the package cache on the host, rather than the target
     -d             Allow installation to a non-mountpoint directory
+    -i             Avoid auto-confirmation of package selections
 
 pacstrap installs packages to the specified new root directory. If no packages
 are given, pacstrap defaults to the "base" group.
@@ -36,13 +37,16 @@ fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-while getopts ':cd' flag; do
+while getopts ':cdi' flag; do
   case $flag in
     d)
       directory=1
       ;;
     c)
       hostcache=1
+      ;;
+    i)
+      interactive=1
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
@@ -62,6 +66,10 @@ if (( ! hostcache )); then
   pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
 fi
 
+if (( ! interactive )); then
+  pacman_args+=(--noconfirm)
+fi
+
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
 if ! mountpoint -q "$newroot" && (( ! directory )); then
   die '%s is not a mountpoint!' "$newroot"
@@ -78,7 +86,7 @@ trap 'api_fs_umount "$newroot" 2>/dev/null' EXIT
 api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
 
 msg 'Installing packages to %s' "$newroot"
-if ! pacman -r "$newroot" -Sy --noconfirm "${pacman_args[@]}"; then
+if ! pacman -r "$newroot" -Sy "${pacman_args[@]}"; then
   die 'Failed to install packages to new root'
 fi
 
