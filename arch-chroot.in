@@ -26,6 +26,6 @@ trap '{ api_fs_umount "$chrootdir"; umount "$chrootdir/etc/resolv.conf"; } 2>/de
 api_fs_mount "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$1"
 mount -B /etc/resolv.conf "$chrootdir/etc/resolv.conf"
 
-chroot "$@"
+chroot "${@:-/bin/sh}"
 
 umount "$chrootdir/etc/resolv.conf"
