@@ -89,11 +89,11 @@ fi
 
 # handle block devices
 findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
-    while read -r source target fstype opts; do
+    while read -r src target fstype opts; do
   # default 5th and 6th columns
   dump=0 pass=2
 
-  source=$(unmangle "$source")
+  src=$(unmangle "$src")
   target=$(unmangle "$target")
 
   # this is root
@@ -109,20 +109,20 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
     pass=0
   fi
 
-  if [[ $source =~ ^(/.+)\[(.+)\]$ ]]; then
+  if [[ $src =~ ^(/.+)\[(.+)\]$ ]]; then
     if [[ $fstype = btrfs ]]; then
-      source=${BASH_REMATCH[1]}
+      src=${BASH_REMATCH[1]}
       opts+=,subvol=${BASH_REMATCH[2]#/}
     else
       # it's a bind mount
-      source=$(findmnt -funcevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
+      src=$(findmnt -funcevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
       fstype=bind
       pass=0
     fi
   fi
 
   # write one line
-  write_source "$source"
+  write_source "$src"
   printf '\t%-10s' "$(mangle "$target")" "$fstype" "$opts"
   printf '\t%s %s' "$dump" "$pass"
   printf '\n\n'
