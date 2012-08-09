@@ -110,10 +110,15 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
   fi
 
   if [[ $source =~ ^(/.+)\[(.+)\]$ ]]; then
-    # it's a bind mount
-    source=$(findmnt -funcevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
-    fstype=bind
-    pass=0
+    if [[ $fstype = btrfs ]]; then
+      source=${BASH_REMATCH[1]}
+      opts+=,subvol=${BASH_REMATCH[2]#/}
+    else
+      # it's a bind mount
+      source=$(findmnt -funcevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
+      fstype=bind
+      pass=0
+    fi
   fi
 
   # write one line
