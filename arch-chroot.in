@@ -6,7 +6,9 @@ m4_include(common)
 
 usage() {
   cat <<EOF
-usage: ${0##*/} chroot-dir
+usage: ${0##*/} chroot-dir [command]
+
+If 'command' is unspecified, ${0##*/} will launch /bin/sh.
 
 EOF
 }
