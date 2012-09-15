@@ -77,7 +77,9 @@ fi
 
 # create obligatory directories
 msg 'Creating install root at %s' "$newroot"
-mkdir -p "$newroot"/var/{cache/pacman/pkg,lib/pacman} "$newroot"/{dev,proc,sys,run,tmp,etc}
+mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman} "$newroot"/{dev,run,etc}
+mkdir -m 1777 "$newroot"/tmp
+mkdir -m 0555 "$newroot"/{sys,proc}
 
 # always call umount on quit after this point
 trap 'api_fs_umount "$newroot" 2>/dev/null' EXIT
