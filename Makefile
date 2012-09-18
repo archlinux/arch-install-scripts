@@ -1,4 +1,4 @@
-VER=6
+VER=7
 
 PREFIX = /usr/local
 
