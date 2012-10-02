@@ -98,8 +98,7 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
 
   # this is root
   target=${target#$root}
-  if [[ $target = ?(/) ]]; then
-    target=/
+  if [[ $target = / ]]; then
     pass=1
   fi
 
@@ -123,7 +122,7 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
 
   # write one line
   write_source "$src"
-  printf '\t%-10s' "$(mangle "$target")" "$fstype" "$opts"
+  printf '\t%-10s' "/$(mangle "${target#/}")" "$fstype" "$opts"
   printf '\t%s %s' "$dump" "$pass"
   printf '\n\n'
 done
