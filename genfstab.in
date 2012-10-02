@@ -88,8 +88,8 @@ if (( bylabel && byuuid )); then
 fi
 
 # handle block devices
-findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
-    while read -r src target fstype opts; do
+findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
+    while read -r src target fstype opts fsroot; do
   # default 5th and 6th columns
   dump=0 pass=2
 
@@ -108,13 +108,12 @@ findmnt -Recruno SOURCE,TARGET,FSTYPE,OPTIONS "$root" |
     pass=0
   fi
 
-  if [[ $src =~ ^(/.+)\[(.+)\]$ ]]; then
+  if [[ $fsroot != / ]]; then
     if [[ $fstype = btrfs ]]; then
-      src=${BASH_REMATCH[1]}
-      opts+=,subvol=${BASH_REMATCH[2]#/}
+      opts+=,subvol=$fsroot
     else
       # it's a bind mount
-      src=$(findmnt -funcevo TARGET "${BASH_REMATCH[1]}")${BASH_REMATCH[2]}
+      src=$(findmnt -funcevo TARGET "$src")$fsroot
       fstype=bind
       pass=0
     fi
