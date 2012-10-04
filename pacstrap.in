@@ -22,6 +22,7 @@ usage() {
 usage: ${0##*/} [options] root [packages...]
 
   Options:
+    -C config      Use an alternate config file for pacman
     -c             Use the package cache on the host, rather than the target
     -d             Allow installation to a non-mountpoint directory
     -G             Avoid copying the host's pacman keyring to the target
@@ -41,8 +42,11 @@ fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-while getopts ':cdGiM' flag; do
+while getopts ':C:cdGiM' flag; do
   case $flag in
+    C)
+      pacman_config=$OPTARG
+      ;;
     d)
       directory=1
       ;;
@@ -78,6 +82,10 @@ fi
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
+fi
+
+if [[ $pacman_config ]]; then
+  pacman_args+=(--config="$pacman_config")
 fi
 
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
