@@ -37,7 +37,7 @@ write_source() {
 
 usage() {
   cat <<EOF
-usage: ${0##*/} root [options]
+usage: ${0##*/} [options] root
 
   Options:
     -L             Use labels for source identifiers
