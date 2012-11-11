@@ -146,6 +146,11 @@ done
 
     if [[ $type = file ]]; then
       printf '%-20s' "$device"
+    elif [[ $device = /dev/dm-+([0-9]) ]]; then
+      # device mapper doesn't allow characters we need to worry
+      # about being mangled, and it does the escaping of dashes
+      # for us in sysfs.
+      write_source "$(dm_name_for_devnode "$device")"
     else
       write_source "$(unmangle "$device")"
     fi

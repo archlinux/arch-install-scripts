@@ -91,6 +91,18 @@ unmangle() {
   printf '%s' "$out${1:i}"
 }
 
+dm_name_for_devnode() {
+  read dm_name <"/sys/class/block/${1#/dev/}/dm/name"
+  if [[ $dm_name ]]; then
+    printf '/dev/mapper/%s' "$dm_name"
+  else
+    # don't leave the caller hanging, just print the original name
+    # along with the failure.
+    print '%s' "$1"
+    error 'Failed to resolve device mapper name for: %s' "$1"
+  fi
+}
+
 fstype_is_pseudofs() {
   # list taken from util-linux source: libmount/src/utils.c
   local pseudofs_types=('anon_inodefs'
