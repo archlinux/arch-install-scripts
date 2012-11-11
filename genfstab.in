@@ -4,12 +4,6 @@ shopt -s extglob
 
 m4_include(common)
 
-get_tag_value() {
-  local device=$1 tag=$2
-
-  blkid -s "$tag" -o value "$1"
-}
-
 write_source() {
   local src=$1 spec= label= uuid= comment=()
 
