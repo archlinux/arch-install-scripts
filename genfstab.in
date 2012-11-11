@@ -4,32 +4,39 @@ shopt -s extglob
 
 m4_include(common)
 
+get_tag_value() {
+  local device=$1 tag=$2
+
+  blkid -s "$tag" -o value "$1"
+}
+
 write_source() {
-  local src=$1 tag= spec= label= uuid= comment=()
+  local src=$1 spec= label= uuid= comment=()
 
   label=$(blkid -s LABEL -o value "$1" 2>/dev/null)
   uuid=$(blkid -s UUID -o value "$1" 2>/dev/null)
 
-  if (( bylabel )); then
-    tag=LABEL
-    spec=$label
-    comment=("$src" "UUID=$uuid")
-  elif (( byuuid )); then
-    tag=UUID
-    spec=$uuid
-    comment=("$src")
-    if [[ $label ]]; then
-      comment+=("LABEL=$label")
-    fi
-  else
-    [[ $uuid ]] && comment+=("UUID=$uuid")
-    [[ $label ]] && comment+=("LABEL=$label")
-  fi
+  case $bytag in
+    LABEL)
+      spec=$label
+      comment=("$src" "UUID=$uuid")
+      ;;
+    UUID)
+      spec=$uuid
+      comment=("$src")
+      [[ $label ]] && comment+=("LABEL=$label")
+      ;;
+    *)
+      comment=("$1" "UUID=$uuid")
+      [[ $label ]] && comment+=("LABEL=$label")
+      [[ $bytag ]] && spec=$(blkid -s "$bytag" -o value "$1")
+      ;;
+  esac
 
   [[ $comment ]] && printf '# %s\n' "${comment[*]}"
 
   if [[ $spec ]]; then
-    printf '%-20s' "$tag=$spec"
+    printf '%-20s' "$bytag=$spec"
   else
     printf '%-20s' "$(mangle "$src")"
   fi
@@ -40,9 +47,10 @@ usage() {
 usage: ${0##*/} [options] root
 
   Options:
-    -L             Use labels for source identifiers
+    -L             Use labels for source identifiers (shortcut for -t LABEL)
     -p             Avoid printing pseudofs mounts
-    -U             Use UUIDs for source identifiers
+    -t TAG         Use TAG for source identifiers
+    -U             Use UUIDs for source identifiers (shortcut for -t UUID)
 
 genfstab generates output suitable for addition to an fstab file based on the
 devices mounted under the mountpoint specified by the given root.
@@ -55,16 +63,19 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':LpU' flag; do
+while getopts ':Lpt:U' flag; do
   case $flag in
     L)
-      bylabel=1
+      bytag=LABEL
       ;;
     U)
-      byuuid=1
+      bytag=UUID
       ;;
     p)
       nopseudofs=1
+      ;;
+    t)
+      bytag=$OPTARG
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
