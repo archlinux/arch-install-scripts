@@ -75,7 +75,7 @@ while getopts ':Lpt:U' flag; do
       nopseudofs=1
       ;;
     t)
-      bytag=$OPTARG
+      bytag=${OPTARG^^}
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
