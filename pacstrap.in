@@ -29,6 +29,8 @@ usage: ${0##*/} [options] root [packages...]
     -i             Avoid auto-confirmation of package selections
     -M             Avoid copying the host's mirrorlist to the target
 
+    -h             Print this help message
+
 pacstrap installs packages to the specified new root directory. If no packages
 are given, pacstrap defaults to the "base" group.
 

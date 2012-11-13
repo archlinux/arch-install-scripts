@@ -8,6 +8,8 @@ usage() {
   cat <<EOF
 usage: ${0##*/} chroot-dir [command]
 
+    -h             Print this help message
+
 If 'command' is unspecified, ${0##*/} will launch /bin/sh.
 
 EOF

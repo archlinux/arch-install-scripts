@@ -52,6 +52,8 @@ usage: ${0##*/} [options] root
     -t TAG         Use TAG for source identifiers
     -U             Use UUIDs for source identifiers (shortcut for -t UUID)
 
+    -h             Print this help message
+
 genfstab generates output suitable for addition to an fstab file based on the
 devices mounted under the mountpoint specified by the given root.
 
