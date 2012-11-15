@@ -123,7 +123,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
 
   if [[ $fsroot != / ]]; then
     if [[ $fstype = btrfs ]]; then
-      opts+=,subvol=$fsroot
+      opts+=,subvol=${fsroot#/}
     else
       # it's a bind mount
       src=$(findmnt -funcevo TARGET "$src")$fsroot
