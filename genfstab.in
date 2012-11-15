@@ -108,11 +108,11 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
 
   src=$(unmangle "$src")
   target=$(unmangle "$target")
-
-  # this is root
   target=${target#$root}
-  if [[ $target = / ]]; then
-    pass=1
+
+  if (( !foundroot )) && findmnt "$src" "$root" >/dev/null; then
+    # this is root. we can't possibly have more than one...
+    pass=1 foundroot=1
   fi
 
   # we don't fsck pseudofs
