@@ -10,7 +10,7 @@ write_source() {
   label=$(blkid -s LABEL -o value "$1" 2>/dev/null)
   uuid=$(blkid -s UUID -o value "$1" 2>/dev/null)
 
-  # bind mounds do not have a UUID!
+  # bind mounts do not have a UUID!
 
   case $bytag in
     '')
