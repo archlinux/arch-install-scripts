@@ -14,14 +14,14 @@ in_array() {
 api_fs_mount() {
   if ! mountpoint -q "$1"; then
     mount -B "$1" "$1" && ROOT_IS_BIND=1
-  fi &&
+  fi
   mount -t proc proc "$1/proc" -o nosuid,noexec,nodev &&
   mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev &&
   mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid &&
   mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec &&
   mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev &&
   mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 &&
-  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid,size=50M
+  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid
 }
 
 api_fs_umount() {
