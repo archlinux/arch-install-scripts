@@ -157,6 +157,9 @@ done
       options+=,pri=$prio
     fi
 
+    # skip files marked deleted by the kernel
+    [[ $device = *'\\040(deleted)' ]] && continue
+
     if [[ $type = file ]]; then
       printf '%-20s' "$device"
     elif [[ $device = /dev/dm-+([0-9]) ]]; then
