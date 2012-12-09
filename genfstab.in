@@ -134,7 +134,8 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
         # just re-adds it.
         continue
       fi
-      fstype=bind
+      fstype=none
+      opts+=,bind
       pass=0
     fi
   fi
