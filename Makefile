@@ -15,7 +15,7 @@ _v_GEN_0 = @echo "  GEN     " $@;
 
 edit = $(V_GEN) m4 -P $@.in >$@ && chmod go-w,+x $@
 
-%: %.in
+%: %.in common
 	$(edit)
 
 clean:
