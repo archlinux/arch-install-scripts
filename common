@@ -11,30 +11,24 @@ in_array() {
   done
 }
 
+track_mount() {
+  mount "$@" && CHROOT_ACTIVE_MOUNTS=("$2" "${CHROOT_ACTIVE_MOUNTS[@]}")
+}
+
 api_fs_mount() {
-  if ! mountpoint -q "$1"; then
-    mount -B "$1" "$1" && ROOT_IS_BIND=1
-  fi
-  mount -t proc proc "$1/proc" -o nosuid,noexec,nodev &&
-  mount -t sysfs sys "$1/sys" -o nosuid,noexec,nodev &&
-  mount -t devtmpfs udev "$1/dev" -o mode=0755,nosuid &&
-  mount -t devpts devpts "$1/dev/pts" -o mode=0620,gid=5,nosuid,noexec &&
-  mount -t tmpfs shm "$1/dev/shm" -o mode=1777,nosuid,nodev &&
-  mount -t tmpfs run "$1/run" -o nosuid,nodev,mode=0755 &&
-  mount -t tmpfs tmp "$1/tmp" -o mode=1777,strictatime,nodev,nosuid
+  CHROOT_ACTIVE_MOUNTS=()
+  { mountpoint -q "$1" || track_mount "$1" "$1" --bind; } &&
+  track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
+  track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev &&
+  track_mount udev "$1/dev" -t devtmpfs -o mode=0755,nosuid &&
+  track_mount devpts "$1/dev/pts" -t devpts -o mode=0620,gid=5,nosuid,noexec &&
+  track_mount shm "$1/dev/shm" -t tmpfs -o mode=1777,nosuid,nodev &&
+  track_mount run "$1/run" -t tmpfs -o nosuid,nodev,mode=0755 &&
+  track_mount tmp "$1/tmp" -t tmpfs -o mode=1777,strictatime,nodev,nosuid
 }
 
 api_fs_umount() {
-  umount \
-    "$1/tmp" \
-    "$1/run" \
-    "$1/dev/shm" \
-    "$1/dev/pts" \
-    "$1/dev" \
-    "$1/sys" \
-    "$1/proc"
-
-  (( ROOT_IS_BIND )) && umount "$1"
+  umount "${CHROOT_ACTIVE_MOUNTS[@]}"
 }
 
 valid_number_of_base() {

@@ -29,8 +29,6 @@ shift
 trap '{ api_fs_umount "$chrootdir"; umount "$chrootdir/etc/resolv.conf"; } 2>/dev/null' EXIT
 
 api_fs_mount "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$chrootdir"
-mount -B /etc/resolv.conf "$chrootdir/etc/resolv.conf"
+track_mount /etc/resolv.conf "$chrootdir/etc/resolv.conf" --bind
 
 SHELL=/bin/sh chroot "$chrootdir" "$@"
-
-umount "$chrootdir/etc/resolv.conf"
