@@ -99,35 +99,35 @@ dm_name_for_devnode() {
 
 fstype_is_pseudofs() {
   # list taken from util-linux source: libmount/src/utils.c
-  local pseudofs_types=('anon_inodefs'
-                        'autofs'
-                        'bdev'
-                        'binfmt_misc'
-                        'cgroup'
-                        'configfs'
-                        'cpuset'
-                        'debugfs'
-                        'devfs'
-                        'devpts'
-                        'devtmpfs'
-                        'dlmfs'
-                        'fuse.gvfs-fuse-daemon'
-                        'fusectl'
-                        'hugetlbfs'
-                        'mqueue'
-                        'nfsd'
-                        'none'
-                        'pipefs'
-                        'proc'
-                        'pstore'
-                        'ramfs'
-                        'rootfs'
-                        'rpc_pipefs'
-                        'securityfs'
-                        'sockfs'
-                        'spufs'
-                        'sysfs'
-                        'tmpfs')
-  in_array "$1" "${pseudofs_types[@]}"
+  local -A pseudofs_types=([anon_inodefs]=1
+                           [autofs]=1
+                           [bdev]=1
+                           [binfmt_misc]=1
+                           [cgroup]=1
+                           [configfs]=1
+                           [cpuset]=1
+                           [debugfs]=1
+                           [devfs]=1
+                           [devpts]=1
+                           [devtmpfs]=1
+                           [dlmfs]=1
+                           [fuse.gvfs-fuse-daemon]=1
+                           [fusectl]=1
+                           [hugetlbfs]=1
+                           [mqueue]=1
+                           [nfsd]=1
+                           [none]=1
+                           [pipefs]=1
+                           [proc]=1
+                           [pstore]=1
+                           [ramfs]=1
+                           [rootfs]=1
+                           [rpc_pipefs]=1
+                           [securityfs]=1
+                           [sockfs]=1
+                           [spufs]=1
+                           [sysfs]=1
+                           [tmpfs]=1)
+  (( pseudofs_types["$1"] ))
 }
 
