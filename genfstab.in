@@ -140,6 +140,20 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     fi
   fi
 
+  # filesystem quirks
+  case $fstype in
+    fuseblk)
+      # well-behaved FUSE filesystems will report themselves as fuse.$fstype.
+      # this is probably NTFS-3g, but let's just make sure.
+      if ! newtype=$(lsblk -no FSTYPE "$src") || [[ -z $newtype ]]; then
+        # avoid blanking out fstype, leading to an invalid fstab
+        error 'Failed to derive real filesystem type for FUSE device on %s' "$target"
+      else
+        fstype=$newtype
+      fi
+      ;;
+  esac
+
   # write one line
   write_source "$src"
   printf '\t%-10s' "/$(mangle "${target#/}")" "$fstype" "$opts"
