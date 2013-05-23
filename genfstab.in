@@ -7,8 +7,8 @@ m4_include(common)
 write_source() {
   local src=$1 spec= label= uuid= comment=()
 
-  label=$(blkid -s LABEL -o value "$1" 2>/dev/null)
-  uuid=$(blkid -s UUID -o value "$1" 2>/dev/null)
+  label=$(lsblk -rno LABEL "$1" 2>/dev/null)
+  uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
 
   # bind mounts do not have a UUID!
 
@@ -29,7 +29,7 @@ write_source() {
     *)
       [[ $uuid ]] && comment=("$1" "UUID=$uuid")
       [[ $label ]] && comment+=("LABEL=$label")
-      [[ $bytag ]] && spec=$(blkid -s "$bytag" -o value "$1")
+      [[ $bytag ]] && spec=$(lsblk -rno "$bytag" "$1" 2>/dev/null)
       ;;
   esac
 
