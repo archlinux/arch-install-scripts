@@ -26,8 +26,6 @@ shift
 
 [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
 
-trap '{ api_fs_umount "$chrootdir"; umount "$chrootdir/etc/resolv.conf"; } 2>/dev/null' EXIT
-
 api_fs_mount "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$chrootdir"
 track_mount /etc/resolv.conf "$chrootdir/etc/resolv.conf" --bind
 

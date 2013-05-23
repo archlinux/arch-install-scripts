@@ -101,9 +101,6 @@ mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{de
 mkdir -m 1777 -p "$newroot"/tmp
 mkdir -m 0555 -p "$newroot"/{sys,proc}
 
-# always call umount on quit after this point
-trap 'api_fs_umount "$newroot" 2>/dev/null' EXIT
-
 # mount API filesystems
 api_fs_mount "$newroot" || die "failed to setup API filesystems in new root"
 

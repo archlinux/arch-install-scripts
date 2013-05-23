@@ -17,6 +17,7 @@ track_mount() {
 
 api_fs_mount() {
   CHROOT_ACTIVE_MOUNTS=()
+  trap 'api_fs_umount' EXIT
   { mountpoint -q "$1" || track_mount "$1" "$1" --bind; } &&
   track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev &&
