@@ -115,9 +115,12 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     pass=1 foundroot=1
   fi
 
-  # we don't fsck pseudofs
-  if fstype_is_pseudofs "$fstype"; then
-    (( nopseudofs )) && continue
+  if fstype_is_pseudofs "$fstype" && (( nopseudofs )); then
+    continue
+  fi
+
+  # if there's no fsck tool available, then only pass=0 makes sense.
+  if ! fstype_has_fsck "$fstype"; then
     pass=0
   fi
 

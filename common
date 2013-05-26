@@ -1,3 +1,48 @@
+# generated from util-linux source: libmount/src/utils.c
+declare -A pseudofs_types=([anon_inodefs]=1
+                           [autofs]=1
+                           [bdev]=1
+                           [binfmt_misc]=1
+                           [cgroup]=1
+                           [configfs]=1
+                           [cpuset]=1
+                           [debugfs]=1
+                           [devfs]=1
+                           [devpts]=1
+                           [devtmpfs]=1
+                           [dlmfs]=1
+                           [fuse.gvfs-fuse-daemon]=1
+                           [fusectl]=1
+                           [hugetlbfs]=1
+                           [mqueue]=1
+                           [nfsd]=1
+                           [none]=1
+                           [pipefs]=1
+                           [proc]=1
+                           [pstore]=1
+                           [ramfs]=1
+                           [rootfs]=1
+                           [rpc_pipefs]=1
+                           [securityfs]=1
+                           [sockfs]=1
+                           [spufs]=1
+                           [sysfs]=1
+                           [tmpfs]=1)
+
+# generated from: pkgfile -vbr '/fsck\..+' | awk -F. '{ print $NF }' | sort
+declare -A fsck_types=([cramfs]=1
+                       [exfat]=1
+                       [ext2]=1
+                       [ext3]=1
+                       [ext4]=1
+                       [ext4dev]=1
+                       [jfs]=1
+                       [minix]=1
+                       [msdos]=1
+                       [reiserfs]=1
+                       [vfat]=1
+                       [xfs]=1)
+
 out() { printf "$1 $2\n" "${@:3}"; }
 error() { out "==> ERROR:" "$@"; } >&2
 msg() { out "==>" "$@"; }
@@ -99,36 +144,9 @@ dm_name_for_devnode() {
 }
 
 fstype_is_pseudofs() {
-  # list taken from util-linux source: libmount/src/utils.c
-  local -A pseudofs_types=([anon_inodefs]=1
-                           [autofs]=1
-                           [bdev]=1
-                           [binfmt_misc]=1
-                           [cgroup]=1
-                           [configfs]=1
-                           [cpuset]=1
-                           [debugfs]=1
-                           [devfs]=1
-                           [devpts]=1
-                           [devtmpfs]=1
-                           [dlmfs]=1
-                           [fuse.gvfs-fuse-daemon]=1
-                           [fusectl]=1
-                           [hugetlbfs]=1
-                           [mqueue]=1
-                           [nfsd]=1
-                           [none]=1
-                           [pipefs]=1
-                           [proc]=1
-                           [pstore]=1
-                           [ramfs]=1
-                           [rootfs]=1
-                           [rpc_pipefs]=1
-                           [securityfs]=1
-                           [sockfs]=1
-                           [spufs]=1
-                           [sysfs]=1
-                           [tmpfs]=1)
   (( pseudofs_types["$1"] ))
 }
 
+fstype_has_fsck() {
+  (( fsck_types["$1"] ))
+}
