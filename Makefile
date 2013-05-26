@@ -21,13 +21,16 @@ edit = $(V_GEN) m4 -P $@.in >$@ && chmod go-w,+x $@
 clean:
 	$(RM) $(BINPROGS)
 
+check: all
+	for f in $(BINPROGS); do bash -O extglob -n $$f; done
+
 install: all
 	install -dm755 $(DESTDIR)$(PREFIX)/bin
-	install -m755 ${BINPROGS} $(DESTDIR)$(PREFIX)/bin
+	install -m755 $(BINPROGS) $(DESTDIR)$(PREFIX)/bin
 	install -Dm644 zsh-completion $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_archinstallscripts
 
 uninstall:
-	for f in ${BINPROGS}; do $(RM) $(DESTDIR)$(PREFIX)/bin/$$f; done
+	for f in $(BINPROGS); do $(RM) $(DESTDIR)$(PREFIX)/bin/$$f; done
 	$(RM) $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_archinstallscripts
 
 dist:
