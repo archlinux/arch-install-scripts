@@ -99,6 +99,10 @@ fi
 # handle block devices
 findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     while read -r src target fstype opts fsroot; do
+  if (( nopseudofs )) && fstype_is_pseudofs "$fstype"; then
+    continue
+  fi
+
   # default 5th and 6th columns
   dump=0 pass=2
 
@@ -109,10 +113,6 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
   if (( !foundroot )) && findmnt "$src" "$root" >/dev/null; then
     # this is root. we can't possibly have more than one...
     pass=1 foundroot=1
-  fi
-
-  if fstype_is_pseudofs "$fstype" && (( nopseudofs )); then
-    continue
   fi
 
   # if there's no fsck tool available, then only pass=0 makes sense.
