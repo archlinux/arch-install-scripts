@@ -96,10 +96,6 @@ if ! mountpoint -q "$root"; then
   die "$root is not a mountpoint"
 fi
 
-if (( bylabel && byuuid )); then
-  die "cannot specify both -U and -L"
-fi
-
 # handle block devices
 findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     while read -r src target fstype opts fsroot; do
