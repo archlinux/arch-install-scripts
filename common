@@ -57,12 +57,15 @@ in_array() {
 }
 
 track_mount() {
+  if [[ -z $CHROOT_ACTIVE_MOUNTS ]]; then
+    CHROOT_ACTIVE_MOUNTS=()
+    trap 'chroot_umount' EXIT
+  fi
+
   mount "$@" && CHROOT_ACTIVE_MOUNTS=("$2" "${CHROOT_ACTIVE_MOUNTS[@]}")
 }
 
 api_fs_mount() {
-  CHROOT_ACTIVE_MOUNTS=()
-  trap 'api_fs_umount' EXIT
   { mountpoint -q "$1" || track_mount "$1" "$1" --bind; } &&
   track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev &&
@@ -73,7 +76,7 @@ api_fs_mount() {
   track_mount tmp "$1/tmp" -t tmpfs -o mode=1777,strictatime,nodev,nosuid
 }
 
-api_fs_umount() {
+chroot_umount() {
   umount "${CHROOT_ACTIVE_MOUNTS[@]}"
 }
 
