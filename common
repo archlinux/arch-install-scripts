@@ -68,7 +68,7 @@ track_mount() {
 api_fs_mount() {
   { mountpoint -q "$1" || track_mount "$1" "$1" --bind; } &&
   track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
-  track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev &&
+  track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev,ro &&
   track_mount udev "$1/dev" -t devtmpfs -o mode=0755,nosuid &&
   track_mount devpts "$1/dev/pts" -t devpts -o mode=0620,gid=5,nosuid,noexec &&
   track_mount shm "$1/dev/shm" -t tmpfs -o mode=1777,nosuid,nodev &&
