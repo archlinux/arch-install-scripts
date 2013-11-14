@@ -65,8 +65,15 @@ track_mount() {
   mount "$@" && CHROOT_ACTIVE_MOUNTS=("$2" "${CHROOT_ACTIVE_MOUNTS[@]}")
 }
 
+mount_conditionally() {
+  local cond=$1; shift
+  if eval "$cond"; then
+    track_mount "$@"
+  fi
+}
+
 api_fs_mount() {
-  { mountpoint -q "$1" || track_mount "$1" "$1" --bind; } &&
+  mount_conditionally "! mountpoint -q '$1'" "$1" "$1" --bind &&
   track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev,ro &&
   track_mount udev "$1/dev" -t devtmpfs -o mode=0755,nosuid &&
