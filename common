@@ -49,6 +49,11 @@ msg() { out "==>" "$@"; }
 msg2() { out "  ->" "$@";}
 die() { error "$@"; exit 1; }
 
+ignore_error() {
+  "$@" 2>/dev/null
+  return 0
+}
+
 in_array() {
   local i
   for i in "${@:2}"; do
@@ -76,7 +81,7 @@ api_fs_mount() {
   mount_conditionally "! mountpoint -q '$1'" "$1" "$1" --bind &&
   track_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   track_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev,ro &&
-  mount_conditionally "[[ -d '$1/sys/firmware/efi/efivars' ]]" \
+  ignore_error mount_conditionally "[[ -d '$1/sys/firmware/efi/efivars' ]]" \
       efivarfs "$1/sys/firmware/efi/efivars" -t efivarfs -o nosuid,noexec,nodev &&
   track_mount udev "$1/dev" -t devtmpfs -o mode=0755,nosuid &&
   track_mount devpts "$1/dev/pts" -t devpts -o mode=0620,gid=5,nosuid,noexec &&
