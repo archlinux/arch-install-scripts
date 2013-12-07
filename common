@@ -115,12 +115,9 @@ mangle() {
       [[:space:]\\])
         printf -v chr '%03o' "'$chr"
         out+=\\
-        ;;&
-        # fallthrough
-      *)
-        out+=$chr
         ;;
     esac
+    out+=$chr
   done
 
   printf '%s' "$out"
@@ -140,11 +137,9 @@ unmangle() {
           printf -v chr '%b' "${1:i:4}"
           (( i += 3 ))
         fi
-        ;;&
-        # fallthrough
-      *)
-        out+=$chr
+        ;;
     esac
+    out+=$chr
   done
 
   printf '%s' "$out${1:i}"
