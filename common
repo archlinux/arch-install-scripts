@@ -98,8 +98,10 @@ valid_number_of_base() {
   local base=$1 len=${#2} i=
 
   for (( i = 0; i < len; i++ )); do
-    (( (${2:i:1} & ~(base - 1)) == 0 )) || return
+    { _=$(( $base#${2:i:1} )) || return 1; } 2>/dev/null
   done
+
+  return 0
 }
 
 mangle() {
