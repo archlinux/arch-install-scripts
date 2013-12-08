@@ -146,6 +146,80 @@ unmangle() {
   printf '%s' "$out${1:i}"
 }
 
+optstring_match_option() {
+  local candidate pat patterns
+
+  IFS=, read -ra patterns <<<"$1"
+  for pat in "${patterns[@]}"; do
+    if [[ $pat = *=* ]]; then
+      # "key=val" will only ever match "key=val"
+      candidate=$2
+    else
+      # "key" will match "key", but also "key=anyval"
+      candidate=${2%%=*}
+    fi
+
+    [[ $pat = "$candidate" ]] && return 0
+  done
+
+  return 1
+}
+
+optstring_remove_option() {
+  local i options_ remove=$2 IFS=,
+
+  read -ra options_ <<<"${!1}"
+
+  for i in "${!options_[@]}"; do
+    optstring_match_option "$remove" "${options_[i]}" && unset 'options_[i]'
+  done
+
+  declare -g "$1=${options_[*]}"
+}
+
+optstring_normalize() {
+  local IFS=, o options_ norm
+
+  read -ra options_ <<<"${!1}"
+
+  # remove empty fields
+  for o in "${options_[@]}"; do
+    [[ $o ]] && norm+=("$o")
+  done
+
+  # avoid empty strings, reset to "defaults"
+  declare -g "$1=${norm[*]:-defaults}"
+}
+
+optstring_append_option() {
+  if ! optstring_has_option "$1" "$2"; then
+    declare -g "$1=${!1},$2"
+  fi
+
+  optstring_normalize "$1"
+}
+
+optstring_prepend_option() {
+  local options_=$1
+
+  if ! optstring_has_option "$1" "$2"; then
+    declare -g "$1=$2,${!1}"
+  fi
+
+  optstring_normalize "$1"
+}
+
+optstring_has_option() {
+  local opts o
+
+  IFS=, read -ra opts <<<"${!1}"
+  for o in "${opts[@]}"; do
+    optstring_match_option "$2" "$o" && return 0
+  done
+
+  return 1
+}
+
 dm_name_for_devnode() {
   read dm_name <"/sys/class/block/${1#/dev/}/dm/name"
   if [[ $dm_name ]]; then

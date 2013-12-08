@@ -1,0 +1,51 @@
+#!/bin/bash
+
+. "${1:-./common}"
+. ./test/common
+
+optstring=rw,relatime,fd=29,pgrp=1,timeout=300,minproto=5,maxproto=5,direct
+optstring_remove_option optstring fd
+optstring_remove_option optstring pgrp=400
+ASSERT_streq "$optstring" 'rw,relatime,pgrp=1,timeout=300,minproto=5,maxproto=5,direct'
+
+optstring_append_option optstring pgrp=400
+optstring_append_option optstring pgrp=400
+optstring_append_option optstring pgrp=400
+ASSERT_streq "$optstring" 'rw,relatime,pgrp=1,timeout=300,minproto=5,maxproto=5,direct,pgrp=400'
+
+optstring_prepend_option optstring pgrp=600
+optstring_prepend_option optstring pgrp=600
+optstring_prepend_option optstring pgrp=600
+ASSERT_streq "$optstring" 'pgrp=600,rw,relatime,pgrp=1,timeout=300,minproto=5,maxproto=5,direct,pgrp=400'
+
+EXPECT_success optstring_has_option optstring pgrp=400
+EXPECT_success optstring_has_option optstring pgrp=1
+EXPECT_success optstring_has_option optstring pgrp
+EXPECT_failure optstring_has_option optstring maxproto=6
+EXPECT_success optstring_has_option optstring maxproto
+
+optstring_remove_option optstring pgrp
+ASSERT_streq "$optstring" 'rw,relatime,timeout=300,minproto=5,maxproto=5,direct'
+
+optstring_remove_option optstring minproto,relatime
+ASSERT_streq "$optstring" 'rw,timeout=300,maxproto=5,direct'
+
+optstring_remove_option optstring ro,direct
+ASSERT_streq "$optstring" 'rw,timeout=300,maxproto=5'
+
+optstring=,,,,,,defaults,,,,rw,,,,,,minproto=5,,,
+optstring_normalize optstring
+ASSERT_streq "$optstring" 'defaults,rw,minproto=5'
+
+
+optstring=
+optstring_normalize optstring
+ASSERT_streq "$optstring" 'defaults'
+
+
+EXPECT_success optstring_match_option key key=val
+EXPECT_success optstring_match_option key=val key=val
+EXPECT_failure optstring_match_option key=val key=val2
+EXPECT_failure optstring_match_option 'key=*' key=val2
+
+(( fail == 0 ))

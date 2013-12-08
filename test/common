@@ -31,7 +31,7 @@ TEST_exit() {
 
 ASSERT_streq() {
   if [[ $1 != "$2" ]]; then
-    printf 'assertion failed: [[ %s = "%s" ]]\n' "$1" "$2" >&2
+    printf 'assertion failed [line %d]: [[ %s = "%s" ]]\n' "$BASH_LINENO" "$1" "$2" >&2
   fi
 }
 
