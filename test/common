@@ -1,0 +1,43 @@
+#!/bin/bash
+
+fail=0
+testcount=0
+
+EXPECT_success() {
+  (( ++testcount ))
+  if ! "$@"; then
+    (( ++fail ))
+    printf 'expectation failed: did not succeed: %s\n' "$*" >&2
+  fi
+}
+
+EXPECT_failure() {
+  (( ++testcount ))
+  if "$@"; then
+    (( ++fail ))
+    printf 'expectation failed: did not fail: %s\n' "$*" >&2
+  fi
+}
+
+TEST_exit() {
+  local result
+
+  trap -- EXIT
+
+  (( fail == 0 )) && result=PASS || result=FAIL
+
+  printf '%s: %s\n' "$result" "$1"
+}
+
+ASSERT_streq() {
+  if [[ $1 != "$2" ]]; then
+    printf 'assertion failed: [[ %s = "%s" ]]\n' "$1" "$2" >&2
+  fi
+}
+
+TEST_start() {
+  trap "TEST_exit '$1'" EXIT
+}
+
+TEST_start "${0##*/test_}"
+

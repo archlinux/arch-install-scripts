@@ -1,0 +1,8 @@
+#!/bin/bash
+
+. "${1:-./common}"
+. ./test/common
+
+ASSERT_streq ' deleted' "$(unmangle "$(mangle ' deleted')")"
+ASSERT_streq '\040deleted' "$(mangle "$(unmangle '\040deleted')")"
+ASSERT_streq 'foo\011\040\011bar' "$(mangle $'foo\t \tbar')"

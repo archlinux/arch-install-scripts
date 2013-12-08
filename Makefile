@@ -22,7 +22,8 @@ clean:
 	$(RM) $(BINPROGS)
 
 check: all
-	for f in $(BINPROGS); do bash -O extglob -n $$f; done
+	@for f in $(BINPROGS); do bash -O extglob -n $$f; done
+	@r=0; for t in test/test_*; do $$t || r=1; done; exit $$r
 
 install: all
 	install -dm755 $(DESTDIR)$(PREFIX)/bin
