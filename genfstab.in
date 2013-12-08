@@ -15,7 +15,7 @@ write_source() {
   case $bytag in
     '')
       [[ $uuid ]] && comment=("UUID=$uuid")
-      [[ $label ]] && comment+=("LABEL=$label")
+      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
       ;;
     LABEL)
       spec=$label
@@ -24,11 +24,11 @@ write_source() {
     UUID)
       spec=$uuid
       comment=("$src")
-      [[ $label ]] && comment+=("LABEL=$label")
+      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
       ;;
     *)
       [[ $uuid ]] && comment=("$1" "UUID=$uuid")
-      [[ $label ]] && comment+=("LABEL=$label")
+      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
       [[ $bytag ]] && spec=$(lsblk -rno "$bytag" "$1" 2>/dev/null)
       ;;
   esac
@@ -36,7 +36,7 @@ write_source() {
   [[ $comment ]] && printf '# %s\n' "${comment[*]}"
 
   if [[ $spec ]]; then
-    printf '%-20s' "$bytag=$spec"
+    printf '%-20s' "$bytag=$(mangle "$spec")"
   else
     printf '%-20s' "$(mangle "$src")"
   fi
