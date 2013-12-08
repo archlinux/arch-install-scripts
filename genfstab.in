@@ -42,6 +42,19 @@ write_source() {
   fi
 }
 
+optstring_apply_quirks() {
+  local varname=$1 fstype=$2
+
+  case $fstype in
+    f2fs)
+      # These are Kconfig options for f2fs. Kernels supporting the options will
+      # only provide the negative versions of these (e.g. noacl), and vice versa
+      # for kernels without support.
+      optstring_remove_option "$varname" noacl,acl,nouser_xattr,user_xattr
+      ;;
+  esac
+}
+
 usage() {
   cat <<EOF
 usage: ${0##*/} [options] root
@@ -152,6 +165,8 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
       fi
       ;;
   esac
+
+  optstring_apply_quirks "opts" "$fstype"
 
   # write one line
   write_source "$src"
