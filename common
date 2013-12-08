@@ -166,19 +166,19 @@ optstring_match_option() {
 }
 
 optstring_remove_option() {
-  local i options_ remove=$2 IFS=,
+  local o options_ remove=$2 IFS=,
 
   read -ra options_ <<<"${!1}"
 
-  for i in "${!options_[@]}"; do
-    optstring_match_option "$remove" "${options_[i]}" && unset 'options_[i]'
+  for o in "${!options_[@]}"; do
+    optstring_match_option "$remove" "${options_[o]}" && unset 'options_[o]'
   done
 
   declare -g "$1=${options_[*]}"
 }
 
 optstring_normalize() {
-  local IFS=, o options_ norm
+  local o options_ norm IFS=,
 
   read -ra options_ <<<"${!1}"
 
@@ -209,15 +209,24 @@ optstring_prepend_option() {
   optstring_normalize "$1"
 }
 
-optstring_has_option() {
+optstring_get_option() {
   local opts o
 
   IFS=, read -ra opts <<<"${!1}"
   for o in "${opts[@]}"; do
-    optstring_match_option "$2" "$o" && return 0
+    if optstring_match_option "$2" "$o"; then
+      declare -g "$o"
+      return 0
+    fi
   done
 
   return 1
+}
+
+optstring_has_option() {
+  local "${2%%=*}"
+
+  optstring_get_option "$1" "$2"
 }
 
 dm_name_for_devnode() {
