@@ -172,7 +172,7 @@ done
     fi
 
     # skip files marked deleted by the kernel
-    [[ $device = *'\\040(deleted)' ]] && continue
+    [[ $device = *'\040(deleted)' ]] && continue
 
     if [[ $type = file ]]; then
       printf '%-20s' "$device"
