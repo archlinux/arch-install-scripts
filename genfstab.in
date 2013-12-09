@@ -52,6 +52,13 @@ optstring_apply_quirks() {
       # for kernels without support.
       optstring_remove_option "$varname" noacl,acl,nouser_xattr,user_xattr
       ;;
+    vfat)
+      # Before Linux v3.8, "cp" is prepended to the value of the codepage.
+      if optstring_get_option "$varname" codepage && [[ $codepage = cp* ]]; then
+        optstring_remove_option "$varname" codepage
+        optstring_append_option "$varname" "codepage=${codepage#cp}"
+      fi
+      ;;
   esac
 }
 
