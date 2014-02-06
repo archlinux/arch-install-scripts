@@ -57,8 +57,9 @@ ignore_error() {
 in_array() {
   local i
   for i in "${@:2}"; do
-    [[ $1 = "$i" ]] && return
+    [[ $1 = "$i" ]] && return 0
   done
+  return 1
 }
 
 track_mount() {
