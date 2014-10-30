@@ -12,7 +12,6 @@ shopt -s extglob
 
 m4_include(common)
 
-newroot=/mnt
 hostcache=0
 copykeyring=1
 copymirrorlist=1
