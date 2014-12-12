@@ -29,4 +29,4 @@ shift
 api_fs_mount "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$chrootdir"
 track_mount /etc/resolv.conf "$chrootdir/etc/resolv.conf" --bind
 
-SHELL=/bin/sh chroot "$chrootdir" "$@"
+SHELL=/bin/sh unshare --fork --pid chroot "$chrootdir" "$@"
