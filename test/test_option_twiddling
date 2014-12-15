@@ -53,5 +53,3 @@ EXPECT_success optstring_match_option key key=val
 EXPECT_success optstring_match_option key=val key=val
 EXPECT_failure optstring_match_option key=val key=val2
 EXPECT_failure optstring_match_option 'key=*' key=val2
-
-(( fail == 0 ))

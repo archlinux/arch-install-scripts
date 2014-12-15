@@ -3,7 +3,6 @@
 . "${1:-./common}"
 . ./test/common
 
-
 EXPECT_success valid_number_of_base 16 feedfacebeef
 EXPECT_failure valid_number_of_base 16 feedsfacebeef
 EXPECT_success valid_number_of_base 16 1234567890
@@ -13,5 +12,3 @@ EXPECT_failure valid_number_of_base 10 1234.567890
 EXPECT_failure valid_number_of_base 10 1234567890abcdef
 
 EXPECT_success valid_number_of_base 18 1234567890abcdefghi
-
-(( fail == 0 ))

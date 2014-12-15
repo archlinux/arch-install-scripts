@@ -7,6 +7,8 @@ BINPROGS = \
 	genfstab \
 	pacstrap
 
+BASH = bash
+
 all: $(BINPROGS)
 
 V_GEN = $(_v_GEN_$(V))
@@ -23,7 +25,7 @@ clean:
 
 check: all
 	@for f in $(BINPROGS); do bash -O extglob -n $$f; done
-	@r=0; for t in test/test_*; do $$t || r=1; done; exit $$r
+	@r=0; for t in test/test_*; do $(BASH) $$t || { echo $$t fail; r=1; }; done; exit $$r
 
 install: all
 	install -dm755 $(DESTDIR)$(PREFIX)/bin

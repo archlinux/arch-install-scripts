@@ -27,6 +27,8 @@ TEST_exit() {
   (( fail == 0 )) && result=PASS || result=FAIL
 
   printf '%s: %s\n' "$result" "$1"
+
+  exit $(( fail != 0 ))
 }
 
 ASSERT_streq() {
