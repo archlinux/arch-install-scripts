@@ -11,4 +11,5 @@ EXPECT_success valid_number_of_base 10 1234567890
 EXPECT_failure valid_number_of_base 10 1234.567890
 EXPECT_failure valid_number_of_base 10 1234567890abcdef
 
-EXPECT_success valid_number_of_base 18 1234567890abcdefghi
+EXPECT_success valid_number_of_base 18 1234567890abcdefgh
+EXPECT_failure valid_number_of_base 18 1234567890abcdefghi

@@ -95,11 +95,15 @@ chroot_umount() {
   umount "${CHROOT_ACTIVE_MOUNTS[@]}"
 }
 
+try_cast() (
+  _=$(( $1#$2 ))
+) 2>/dev/null
+
 valid_number_of_base() {
   local base=$1 len=${#2} i=
 
   for (( i = 0; i < len; i++ )); do
-    { _=$(( $base#${2:i:1} )) || return 1; } 2>/dev/null
+    try_cast "$base" "${2:i:1}" || return 1
   done
 
   return 0
