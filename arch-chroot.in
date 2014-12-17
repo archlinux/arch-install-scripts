@@ -26,7 +26,7 @@ shift
 
 [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
 
-chroot_setup "$chrootdir" || die "failed to setup API filesystems in chroot %s" "$chrootdir"
+chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
 chroot_add_mount /etc/resolv.conf "$chrootdir/etc/resolv.conf" --bind
 
 SHELL=/bin/sh unshare --fork --pid chroot "$chrootdir" "$@"

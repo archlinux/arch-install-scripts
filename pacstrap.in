@@ -101,7 +101,7 @@ mkdir -m 1777 -p "$newroot"/tmp
 mkdir -m 0555 -p "$newroot"/{sys,proc}
 
 # mount API filesystems
-chroot_setup "$newroot" || die "failed to setup API filesystems in new root"
+chroot_setup "$newroot" || die "failed to setup chroot %s" "$newroot"
 
 msg 'Installing packages to %s' "$newroot"
 if ! pacman -r "$newroot" -Sy "${pacman_args[@]}"; then
