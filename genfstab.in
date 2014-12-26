@@ -45,6 +45,11 @@ write_source() {
 optstring_apply_quirks() {
   local varname=$1 fstype=$2
 
+  # SELinux displays a 'seclabel' option in /proc/self/mountinfo. We can't know
+  # if the system we're generating the fstab for has any support for SELinux (as
+  # one might install Arch from a Fedora environment), so let's remove it.
+  optstring_remove_option "$varname" seclabel
+
   case $fstype in
     f2fs)
       # These are Kconfig options for f2fs. Kernels supporting the options will
