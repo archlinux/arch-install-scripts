@@ -68,7 +68,8 @@ usage: ${0##*/} [options] root
 
   Options:
     -L             Use labels for source identifiers (shortcut for -t LABEL)
-    -p             Avoid printing pseudofs mounts
+    -p             Exclude pseudofs mounts (default behavior)
+    -P             Include printing mounts
     -t TAG         Use TAG for source identifiers
     -U             Use UUIDs for source identifiers (shortcut for -t UUID)
 
@@ -85,7 +86,7 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':Lpt:U' flag; do
+while getopts ':LPpt:U' flag; do
   case $flag in
     L)
       bytag=LABEL
@@ -93,8 +94,11 @@ while getopts ':Lpt:U' flag; do
     U)
       bytag=UUID
       ;;
+    P)
+      pseudofs=1
+      ;;
     p)
-      nopseudofs=1
+      pseudofs=0
       ;;
     t)
       bytag=${OPTARG^^}
@@ -119,7 +123,7 @@ fi
 # handle block devices
 findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     while read -r src target fstype opts fsroot; do
-  if (( nopseudofs )) && fstype_is_pseudofs "$fstype"; then
+  if (( !pseudofs )) && fstype_is_pseudofs "$fstype"; then
     continue
   fi
 
