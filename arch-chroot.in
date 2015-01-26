@@ -15,6 +15,29 @@ If 'command' is unspecified, ${0##*/} will launch /bin/sh.
 EOF
 }
 
+chroot_add_resolv_conf() {
+  local chrootdir=$1 resolv_conf=$1/etc/resolv.conf
+
+  # Handle resolv.conf as a symlink to somewhere else.
+  if [[ -L $chrootdir/etc/resolv.conf ]]; then
+    # readlink(1) should always give us *something* since we know at this point
+    # it's a symlink. For simplicity, ignore the case of nested symlinks.
+    resolv_conf=$(readlink "$chrootdir/etc/resolv.conf")
+    if [[ $resolv_conf = /* ]]; then
+      resolv_conf=$chrootdir$resolv_conf
+    else
+      resolv_conf=$chrootdir/etc/$resolv_conf
+    fi
+
+    # ensure file exists to bind mount over
+    if [[ ! -f $resolv_conf ]]; then
+      install -Dm644 /dev/null "$resolv_conf" || return 1
+    fi
+  fi
+
+  chroot_add_mount /etc/resolv.conf "$resolv_conf" --bind
+}
+
 if [[ -z $1 || $1 = @(-h|--help) ]]; then
   usage
   exit $(( $# ? 0 : 1 ))
@@ -27,6 +50,6 @@ shift
 [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
 
 chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
-chroot_add_mount /etc/resolv.conf "$chrootdir/etc/resolv.conf" --bind
+chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
 
 SHELL=/bin/sh unshare --fork --pid chroot "$chrootdir" "$@"
