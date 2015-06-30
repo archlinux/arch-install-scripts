@@ -52,4 +52,4 @@ shift
 chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
 chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
 
-SHELL=/bin/sh unshare --fork --pid chroot "$chrootdir" "$@"
+SHELL=/bin/bash unshare --fork --pid chroot "$chrootdir" "$@"
