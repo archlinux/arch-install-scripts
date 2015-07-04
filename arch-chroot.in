@@ -33,6 +33,9 @@ chroot_add_resolv_conf() {
     if [[ ! -f $resolv_conf ]]; then
       install -Dm644 /dev/null "$resolv_conf" || return 1
     fi
+  elif [[ ! -e $chrootdir/etc/resolv.conf ]]; then
+    # The chroot might not have a resolv.conf.
+    return 0
   fi
 
   chroot_add_mount /etc/resolv.conf "$resolv_conf" --bind
