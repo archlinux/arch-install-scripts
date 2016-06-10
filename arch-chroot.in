@@ -65,6 +65,7 @@ shift $(( OPTIND - 1 ))
 chrootdir=$1
 shift
 
+(( $# )) || die 'No chroot directory specified'
 [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
 
 chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
