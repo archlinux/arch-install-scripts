@@ -11,7 +11,7 @@ usage: ${0##*/} chroot-dir [command]
     -h                  Print this help message
     -u <user>[:group]   Specify non-root user and optional group to use
 
-If 'command' is unspecified, ${0##*/} will launch /bin/sh.
+If 'command' is unspecified, ${0##*/} will launch /bin/bash.
 
 EOF
 }
