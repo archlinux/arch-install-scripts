@@ -4,6 +4,7 @@ declare -A pseudofs_types=([anon_inodefs]=1
                            [bdev]=1
                            [binfmt_misc]=1
                            [cgroup]=1
+                           [cgroup2]=1
                            [configfs]=1
                            [cpuset]=1
                            [debugfs]=1
