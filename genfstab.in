@@ -50,6 +50,13 @@ optstring_apply_quirks() {
   # one might install Arch from a Fedora environment), so let's remove it.
   optstring_remove_option "$varname" seclabel
 
+  # Prune 'relatime' option for any pseudofs. This seems to be a rampant
+  # default which the kernel often exports even if the underlying filesystem
+  # doesn't support it. Example: https://bugs.archlinux.org/task/54554.
+  if awk -v fstype="$fstype" '$1 == fstype { exit 1 }' /proc/filesystems; then
+    optstring_remove_option "$varname" relatime
+  fi
+
   case $fstype in
     f2fs)
       # These are Kconfig options for f2fs. Kernels supporting the options will
@@ -74,7 +81,7 @@ usage: ${0##*/} [options] root
   Options:
     -L             Use labels for source identifiers (shortcut for -t LABEL)
     -p             Exclude pseudofs mounts (default behavior)
-    -P             Include printing mounts
+    -P             Include pseudofs mounts
     -t TAG         Use TAG for source identifiers
     -U             Use UUIDs for source identifiers (shortcut for -t UUID)
 
