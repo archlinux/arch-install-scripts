@@ -79,7 +79,6 @@ chroot_setup() {
   [[ $(trap -p EXIT) ]] && die '(BUG): attempting to overwrite existing EXIT trap'
   trap 'chroot_teardown' EXIT
 
-  chroot_maybe_add_mount "! mountpoint -q '$1'" "$1" "$1" --bind &&
   chroot_add_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   chroot_add_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev,ro &&
   ignore_error chroot_maybe_add_mount "[[ -d '$1/sys/firmware/efi/efivars' ]]" \
