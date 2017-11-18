@@ -23,7 +23,6 @@ usage: ${0##*/} [options] root [packages...]
   Options:
     -C config      Use an alternate config file for pacman
     -c             Use the package cache on the host, rather than the target
-    -d             Allow installation to a non-mountpoint directory
     -G             Avoid copying the host's pacman keyring to the target
     -i             Avoid auto-confirmation of package selections
     -M             Avoid copying the host's mirrorlist to the target
@@ -49,7 +48,7 @@ while getopts ':C:cdGiM' flag; do
       pacman_config=$OPTARG
       ;;
     d)
-      directory=1
+      # retired flag. does nothing.
       ;;
     c)
       hostcache=1
@@ -90,9 +89,6 @@ if [[ $pacman_config ]]; then
 fi
 
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
-if ! mountpoint -q "$newroot" && (( ! directory )); then
-  die '%s is not a mountpoint!' "$newroot"
-fi
 
 # create obligatory directories
 msg 'Creating install root at %s' "$newroot"
