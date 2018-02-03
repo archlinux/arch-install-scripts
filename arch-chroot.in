@@ -19,6 +19,8 @@ EOF
 chroot_add_resolv_conf() {
   local chrootdir=$1 resolv_conf=$1/etc/resolv.conf
 
+  [[ -e /etc/resolv.conf ]] || return 0
+
   # Handle resolv.conf as a symlink to somewhere else.
   if [[ -L $chrootdir/etc/resolv.conf ]]; then
     # readlink(1) should always give us *something* since we know at this point
