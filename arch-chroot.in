@@ -73,6 +73,5 @@ chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
 
 chroot_args=()
 [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
-chroot_args+=("$chrootdir" "$@")
 
-SHELL=/bin/bash unshare --fork --pid chroot "${chroot_args[@]}"
+SHELL=/bin/bash unshare --fork --pid chroot "${chroot_args[@]}" -- "$chrootdir" "$@"
