@@ -79,6 +79,7 @@ usage() {
 usage: ${0##*/} [options] root
 
   Options:
+    -f FILTER      Restrict output to mountpoints matching the prefix FILTER
     -L             Use labels for source identifiers (shortcut for -t LABEL)
     -p             Exclude pseudofs mounts (default behavior)
     -P             Include pseudofs mounts
@@ -98,13 +99,16 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':LPpt:U' flag; do
+while getopts ':f:LPpt:U' flag; do
   case $flag in
     L)
       bytag=LABEL
       ;;
     U)
       bytag=UUID
+      ;;
+    f)
+      prefixfilter=$OPTARG
       ;;
     P)
       pseudofs=1
@@ -138,6 +142,8 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
   if (( !pseudofs )) && fstype_is_pseudofs "$fstype"; then
     continue
   fi
+
+  [[ $target = "$prefixfilter"* ]] || continue
 
   # default 5th and 6th columns
   dump=0 pass=2
