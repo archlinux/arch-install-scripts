@@ -81,10 +81,6 @@ if (( ! interactive )); then
   pacman_args+=(--noconfirm)
 fi
 
-if [[ $pacman_config ]]; then
-  pacman_args+=(--config="$pacman_config")
-fi
-
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
 
 # create obligatory directories
@@ -96,8 +92,14 @@ mkdir -m 0555 -p "$newroot"/{sys,proc}
 # mount API filesystems
 chroot_setup "$newroot" || die "failed to setup chroot %s" "$newroot"
 
+if [[ $pacman_config ]]; then
+  pacman-conf --config "$pacman_config" "$newroot/tmp/pacman.conf"
+else
+  pacman-conf > "$newroot/tmp/pacman.conf"
+fi
+
 msg 'Installing packages to %s' "$newroot"
-if ! pacman -r "$newroot" -Sy "${pacman_args[@]}"; then
+if ! pacman -r "$newroot" --config "$newroot"/tmp/pacman.conf -Sy "${pacman_args[@]}"; then
   die 'Failed to install packages to new root'
 fi
 
