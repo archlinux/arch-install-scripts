@@ -75,7 +75,6 @@ shift $(( OPTIND - 1 ))
 (( $# )) || die "No root directory specified"
 newroot=$1; shift
 pacman_args=("${@:-base}")
-pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
@@ -85,7 +84,7 @@ fi
 
 # create obligatory directories
 msg 'Creating install root at %s' "$newroot"
-mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc}
+mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc/pacman.d}
 mkdir -m 1777 -p "$newroot"/tmp
 mkdir -m 0555 -p "$newroot"/{sys,proc}
 
@@ -98,11 +97,6 @@ else
   pacman-conf > "$newroot/tmp/pacman.conf"
 fi
 
-msg 'Installing packages to %s' "$newroot"
-if ! pacman -r "$newroot" --config "$newroot"/tmp/pacman.conf -Sy "${pacman_args[@]}"; then
-  die 'Failed to install packages to new root'
-fi
-
 if (( copykeyring )); then
   # if there's a keyring on the host, copy it into the new root, unless it exists already
   if [[ -d /etc/pacman.d/gnupg && ! -d $newroot/etc/pacman.d/gnupg ]]; then
@@ -113,6 +107,11 @@ fi
 if (( copymirrorlist )); then
   # install the host's mirrorlist onto the new root
   cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
+fi
+
+msg 'Installing packages to %s' "$newroot"
+if ! pacman --sysroot "$newroot" --config /tmp/pacman.conf -Sy "${pacman_args[@]}"; then
+  die 'Failed to install packages to new root'
 fi
 
 # vim: et ts=2 sw=2 ft=sh:
