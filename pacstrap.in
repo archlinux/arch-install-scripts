@@ -24,7 +24,7 @@ usage: ${0##*/} [options] root [packages...]
     -C config      Use an alternate config file for pacman
     -c             Use the package cache on the host, rather than the target
     -G             Avoid copying the host's pacman keyring to the target
-    -i             Avoid auto-confirmation of package selections
+    -i             Prompt for package confirmation when needed
     -M             Avoid copying the host's mirrorlist to the target
 
     -h             Print this help message
