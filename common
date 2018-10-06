@@ -91,7 +91,9 @@ chroot_setup() {
 }
 
 chroot_teardown() {
-  umount "${CHROOT_ACTIVE_MOUNTS[@]}"
+  if (( ${#CHROOT_ACTIVE_MOUNTS[@]} )); then
+    umount "${CHROOT_ACTIVE_MOUNTS[@]}"
+  fi
   unset CHROOT_ACTIVE_MOUNTS
 }
 
