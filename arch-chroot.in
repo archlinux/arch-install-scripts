@@ -13,6 +13,13 @@ usage: ${0##*/} chroot-dir [command]
 
 If 'command' is unspecified, ${0##*/} will launch /bin/bash.
 
+Note that when using arch-chroot, the target chroot directory *should* be a
+mountpoint. This ensures that tools such as pacman(8) or findmnt(8) have an
+accurate hierarchy of the mounted filesystems within the chroot.
+
+If your chroot target is not a mountpoint, you can bind mount the directory on
+itself to make it a mountpoint, i.e. 'mount --bind /your/chroot /your/chroot'.
+
 EOF
 }
 
@@ -69,6 +76,10 @@ chrootdir=$1
 shift
 
 [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
+
+if ! mountpoint "$chrootdir"; then
+  warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
+fi
 
 chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
 chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
