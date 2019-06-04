@@ -1,0 +1,50 @@
+genfstab(8)
+===========
+
+Name
+----
+genfstab - generate output suitable for addition to an fstab file
+
+Synopsis
+--------
+genfstab [options] root
+
+Description
+-----------
+genfstab helps fill in an fstab file by autodetecting all the current mounts
+below a given mountpoint and printing them in fstab-compatible format to
+standard output. It can be used to persist a manually mounted filesystem
+hierarchy and is often used during the initial install and configuration of an
+OS.
+
+Options
+-------
+
+*-f* <filter>::
+	Restrict output to mountpoints matching the prefix 'filter'.
+
+*-L*::
+	Use labels for source identifiers (shortcut for '-t LABEL').
+
+*-p*::
+	Exclude pseudofs mounts (default behavior).
+
+*-P*::
+	Include pseudofs mounts.
+
+*-t* <tag>::
+	Use 'tag' for source identifiers (should be one of: 'LABEL', 'UUID',
+	'PARTLABEL', 'PARTUUID').
+
+*-U*::
+	Use UUIDs for source identifiers (shortcut for '-t UUID').
+
+*-h*::
+	Output syntax and command line options.
+
+See Also
+--------
+
+linkman:pacman[1]
+
+include::footer.asciidoc[]

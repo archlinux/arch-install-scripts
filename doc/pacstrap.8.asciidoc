@@ -1,0 +1,47 @@
+pacstrap(8)
+===========
+
+Name
+----
+pacstrap - install packages to the specified new root directory
+
+Synopsis
+--------
+pacstrap [options] root [packages...]
+
+Description
+-----------
+pacstrap is designed to create a new system installation from scratch. The
+specified packages will be installed into a given directory after setting up
+some basic mountpoints. By default, the host system's pacman signing keys
+and mirrorlist will be used to seed the chroot.
+
+If no packages are specified to be installed, the 'base' group will be installed.
+
+Options
+-------
+
+*-C* <config>::
+	Use an alternate config file for pacman.
+
+*-c*::
+	Use the package cache on the host, rather than the target.
+
+*-G*::
+	Avoid copying the host's pacman keyring to the target.
+
+*-i*::
+	Prompt for package confirmation when needed (run interactively).
+
+*-M*::
+	Avoid copying the host's mirrorlist to the target.
+
+*-h*::
+	Output syntax and command line options.
+
+See Also
+--------
+
+linkman:pacman[1]
+
+include::footer.asciidoc[]

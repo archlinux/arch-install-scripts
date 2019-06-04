@@ -1,0 +1,34 @@
+arch-chroot(8)
+==============
+
+Name
+----
+arch-chroot - enhanced chroot command
+
+Synopsis
+--------
+arch-chroot [options] chroot-dir [command]
+
+Description
+-----------
+arch-chroot wraps the linkman:chroot[1] command while ensuring that important
+functionality is available, e.g. mounting '/dev/', '/proc' and other API
+filesystems, or exposing linkman:resolv.conf[5] to the chroot.
+
+If 'command' is unspecified, arch-chroot will launch */bin/bash*.
+
+Options
+-------
+
+*-u <user>[:group]*::
+	Specify non-root user and optional group to use.
+
+*-h*::
+	Output syntax and command line options.
+
+See Also
+--------
+
+linkman:pacman[1]
+
+include::footer.asciidoc[]

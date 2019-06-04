@@ -7,6 +7,11 @@ BINPROGS = \
 	genfstab \
 	pacstrap
 
+MANS = \
+	doc/arch-chroot.8 \
+	doc/genfstab.8 \
+	doc/pacstrap.8
+
 BASH = bash
 
 all: $(BINPROGS) man
