@@ -17,6 +17,18 @@ filesystems, or exposing linkman:resolv.conf[5] to the chroot.
 
 If 'command' is unspecified, arch-chroot will launch */bin/bash*.
 
+[NOTE]
+======
+The target chroot-dir *should* be a mountpoint. This ensures that tools such as
+linkman:pacman[8] or linkman:findmnt[8] have an accurate hierarchy of the
+mounted filesystems within the chroot. If your chroot target is not a
+mountpoint, you can bind mount the directory on itself to make it a mountpoint,
+i.e.:
+
+'mount --bind /your/chroot /your/chroot'
+======
+
+
 Options
 -------
 
