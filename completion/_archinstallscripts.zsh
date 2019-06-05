@@ -6,7 +6,6 @@ _pacstrap_args=(
 
 _pacstrap_args_nonh=(
     '(-h --help)-c[Use the package cache on the host, rather than the target]'
-    '(-h --help)-d[Allow installation to a non-mountpoint directory]'
     '(--help -h)-i[Avoid auto-confirmation of package selections]'
 )
 
