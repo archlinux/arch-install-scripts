@@ -21,7 +21,7 @@ usage() {
 usage: ${0##*/} [options] root [packages...]
 
   Options:
-    -C config      Use an alternate config file for pacman
+    -C <config>    Use an alternate config file for pacman
     -c             Use the package cache on the host, rather than the target
     -G             Avoid copying the host's pacman keyring to the target
     -i             Prompt for package confirmation when needed (run interactively)
