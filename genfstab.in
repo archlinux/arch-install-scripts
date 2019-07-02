@@ -220,7 +220,7 @@ done
     [[ $device = *'\040(deleted)' ]] && continue
 
     if [[ $type = file ]]; then
-      printf '%-20s' "$device"
+      printf '%-20s' "${device#${root%/}}"
     elif [[ $device = /dev/dm-+([0-9]) ]]; then
       # device mapper doesn't allow characters we need to worry
       # about being mangled, and it does the escaping of dashes
