@@ -36,6 +36,10 @@ Options
 *-M*::
 	Avoid copying the host's mirrorlist to the target.
 
+*-U*::
+	Use pacman -U to install packages. Useful for obtaining fine-grained
+	control over the installed packages.
+
 *-h*::
 	Output syntax and command line options.
 

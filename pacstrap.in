@@ -15,6 +15,7 @@ m4_include(common)
 hostcache=0
 copykeyring=1
 copymirrorlist=1
+pacmode=-Sy
 
 usage() {
   cat <<EOF
@@ -26,6 +27,7 @@ usage: ${0##*/} [options] root [packages...]
     -G             Avoid copying the host's pacman keyring to the target
     -i             Prompt for package confirmation when needed (run interactively)
     -M             Avoid copying the host's mirrorlist to the target
+    -U             Use pacman -U to install packages
 
     -h             Print this help message
 
@@ -42,7 +44,7 @@ fi
 
 (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-while getopts ':C:cdGiM' flag; do
+while getopts ':C:cdGiMU' flag; do
   case $flag in
     C)
       pacman_config=$OPTARG
@@ -61,6 +63,9 @@ while getopts ':C:cdGiM' flag; do
       ;;
     M)
       copymirrorlist=0
+      ;;
+    U)
+      pacmode=-U
       ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
@@ -107,7 +112,7 @@ if (( copykeyring )); then
 fi
 
 msg 'Installing packages to %s' "$newroot"
-if ! pacman -r "$newroot" -Sy "${pacman_args[@]}"; then
+if ! unshare --fork --pid pacman -r "$newroot" $pacmode "${pacman_args[@]}"; then
   die 'Failed to install packages to new root'
 fi
 
