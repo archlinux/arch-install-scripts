@@ -163,23 +163,19 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     pass=0
   fi
 
-  if [[ $fsroot != / ]]; then
-    if [[ $fstype = btrfs ]]; then
-      opts+=,subvol=${fsroot#/}
-    else
-      # it's a bind mount
-      src=$(findmnt -funcevo TARGET "$src")$fsroot
-      if [[ $src -ef $target ]]; then
-        # hrmm, this is weird. we're probably looking at a file or directory
-        # that was bound into a chroot from the host machine. Ignore it,
-        # because this won't actually be a valid mount. Worst case, the user
-        # just re-adds it.
-        continue
-      fi
-      fstype=none
-      opts+=,bind
-      pass=0
+  if [[ $fsroot != / && $fstype != btrfs ]]; then
+    # it's a bind mount
+    src=$(findmnt -funcevo TARGET "$src")$fsroot
+    if [[ $src -ef $target ]]; then
+      # hrmm, this is weird. we're probably looking at a file or directory
+      # that was bound into a chroot from the host machine. Ignore it,
+      # because this won't actually be a valid mount. Worst case, the user
+      # just re-adds it.
+      continue
     fi
+    fstype=none
+    opts+=,bind
+    pass=0
   fi
 
   # filesystem quirks
