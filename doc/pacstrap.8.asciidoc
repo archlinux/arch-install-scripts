@@ -16,7 +16,8 @@ specified packages will be installed into a given directory after setting up
 some basic mountpoints. By default, the host system's pacman signing keys
 and mirrorlist will be used to seed the chroot.
 
-If no packages are specified to be installed, the 'base' group will be installed.
+If no packages are specified to be installed, the 'base' metapackage will be
+installed.
 
 Options
 -------
