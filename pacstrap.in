@@ -82,7 +82,8 @@ newroot=$1; shift
 pacman_args=("${@:-base}")
 
 if (( ! hostcache )); then
-  pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
+  mapfile -t cache_dirs < <(pacman-conf CacheDir)
+  pacman_args+=("${cache_dirs[@]/#/--cachedir=}")
 fi
 
 if (( ! interactive )); then
