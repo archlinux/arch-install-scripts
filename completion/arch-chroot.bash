@@ -1,6 +1,6 @@
 _arch_chroot() {
     compopt +o dirnames
-    local cur prev opts
+    local cur prev opts i
     _init_completion -n : || return
     opts="-u -h"
 
