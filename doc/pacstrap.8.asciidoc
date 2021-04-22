@@ -47,6 +47,6 @@ Options
 See Also
 --------
 
-linkman:pacman[1]
+linkman:pacman[8]
 
 include::footer.asciidoc[]
