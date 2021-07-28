@@ -243,7 +243,6 @@ dm_name_for_devnode() {
   else
     # don't leave the caller hanging, just print the original name
     # along with the failure.
-    print '%s' "$1"
     error 'Failed to resolve device mapper name for: %s' "$1"
   fi
 }
