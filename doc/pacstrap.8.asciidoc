@@ -37,6 +37,11 @@ Options
 *-M*::
 	Avoid copying the host's mirrorlist to the target.
 
+*-N*::
+	Run in unshare mode. This will use linkman:unshare[1] to create a new
+	mount and user namespace, allowing regular users to create new system
+	installations.
+
 *-U*::
 	Use pacman -U to install packages. Useful for obtaining fine-grained
 	control over the installed packages.
