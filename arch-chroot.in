@@ -4,11 +4,15 @@ shopt -s extglob
 
 m4_include(common)
 
+setup=chroot_setup
+unshare="$root_unshare"
+
 usage() {
   cat <<EOF
 usage: ${0##*/} chroot-dir [command]
 
     -h                  Print this help message
+    -N                  Run in unshare mode as a regular user
     -u <user>[:group]   Specify non-root user and optional group to use
 
 If 'command' is unspecified, ${0##*/} will launch /bin/bash.
@@ -51,11 +55,15 @@ chroot_add_resolv_conf() {
   chroot_add_mount /etc/resolv.conf "$resolv_conf" --bind
 }
 
-while getopts ':hu:' flag; do
+while getopts ':hNu:' flag; do
   case $flag in
     h)
       usage
       exit 0
+      ;;
+    N)
+      setup=unshare_setup
+      unshare="$user_unshare"
       ;;
     u)
       userspec=$OPTARG
@@ -70,21 +78,27 @@ while getopts ':hu:' flag; do
 done
 shift $(( OPTIND - 1 ))
 
-(( EUID == 0 )) || die 'This script must be run with root privileges'
 (( $# )) || die 'No chroot directory specified'
 chrootdir=$1
 shift
 
-[[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
+arch-chroot() {
+  (( EUID == 0 )) || die 'This script must be run with root privileges'
 
-if ! mountpoint -q "$chrootdir"; then
-  warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
-fi
+  [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
 
-chroot_setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
-chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
+  $setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
+  chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
 
-chroot_args=()
-[[ $userspec ]] && chroot_args+=(--userspec "$userspec")
+  if ! mountpoint -q "$chrootdir"; then
+    warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
+  fi
 
-SHELL=/bin/bash unshare --fork --pid chroot "${chroot_args[@]}" -- "$chrootdir" "$@"
+  chroot_args=()
+  [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
+
+  SHELL=/bin/bash chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
+}
+
+args=("$@")
+$unshare bash -c "$(declare_all); arch-chroot"

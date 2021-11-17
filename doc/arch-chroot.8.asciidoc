@@ -32,6 +32,11 @@ i.e.:
 Options
 -------
 
+*-N*::
+	Run in unshare mode. This will use linkman:unshare[1] to create a new
+	mount and user namespace, allowing regular users to create new system
+	installations.
+
 *-u <user>[:group]*::
 	Specify non-root user and optional group to use.
 
