@@ -6,7 +6,7 @@ m4_include(common)
 
 usage() {
   cat <<EOF
-usage: ${0##*/} chroot-dir [command] [arguments]
+usage: ${0##*/} chroot-dir [command] [arguments...]
 
     -h                  Print this help message
     -u <user>[:group]   Specify non-root user and optional group to use

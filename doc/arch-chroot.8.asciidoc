@@ -7,7 +7,7 @@ arch-chroot - enhanced chroot command
 
 Synopsis
 --------
-arch-chroot [options] chroot-dir [command]
+arch-chroot [options] chroot-dir [command] [arguments...]
 
 Description
 -----------
