@@ -9,6 +9,7 @@ tasks when installing [Arch Linux](https://www.archlinux.org).
 * util-linux (>= 2.23)
 * POSIX awk
 * bash (>= 4.1)
+* asciidoc (for generating man pages)
 
 ## License
 
