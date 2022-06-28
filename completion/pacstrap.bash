@@ -8,7 +8,7 @@ _pacstrap() {
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="-C -c -G -i -M -h"
+    opts="-C -c -G -i -M -N -h"
 
     for i in "${COMP_WORDS[@]:1:COMP_CWORD-1}"; do
         if [[ -d ${i} ]]; then

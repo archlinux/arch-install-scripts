@@ -2,7 +2,7 @@ _arch_chroot() {
     compopt +o dirnames
     local cur prev opts i
     _init_completion -n : || return
-    opts="-u -h"
+    opts="-N -u -h"
 
     for i in "${COMP_WORDS[@]:1:COMP_CWORD-1}"; do
         if [[ -d ${i} ]]; then
