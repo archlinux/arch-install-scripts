@@ -39,6 +39,7 @@ declare -A fsck_types=([cramfs]=1
                        [ext3]=1
                        [ext4]=1
                        [ext4dev]=1
+                       [f2fs]=1
                        [jfs]=1
                        [minix]=1
                        [msdos]=1
