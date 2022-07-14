@@ -33,13 +33,15 @@ declare -A pseudofs_types=([anon_inodefs]=1
                            [tmpfs]=1)
 
 # generated from: pkgfile -vbr '/fsck\..+' | awk -F. '{ print $NF }' | sort
-declare -A fsck_types=([cramfs]=1
+declare -A fsck_types=([btrfs]=1
+                       [cramfs]=1
+                       [erofs]=1
                        [exfat]=1
                        [ext2]=1
                        [ext3]=1
                        [ext4]=1
-                       [ext4dev]=1
                        [f2fs]=1
+                       [fat]=1
                        [jfs]=1
                        [minix]=1
                        [msdos]=1
