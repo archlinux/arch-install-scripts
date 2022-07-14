@@ -1,9 +1,11 @@
 # generated from util-linux source: libmount/src/utils.c
 declare -A pseudofs_types=([anon_inodefs]=1
+                           [apparmorfs]=1
                            [autofs]=1
                            [bdev]=1
-                           [bpf]=1
+                           [binder]=1
                            [binfmt_misc]=1
+                           [bpf]=1
                            [cgroup]=1
                            [cgroup2]=1
                            [configfs]=1
@@ -13,24 +15,45 @@ declare -A pseudofs_types=([anon_inodefs]=1
                            [devpts]=1
                            [devtmpfs]=1
                            [dlmfs]=1
+                           [dmabuf]=1
+                           [drm]=1
                            [efivarfs]=1
+                           [fuse]=1
+                           [fuse.archivemount]=1
+                           [fuse.avfsd]=1
+                           [fuse.dumpfs]=1
+                           [fuse.encfs]=1
                            [fuse.gvfs-fuse-daemon]=1
+                           [fuse.gvfsd-fuse]=1
+                           [fuse.lxcfs]=1
+                           [fuse.rofiles-fuse]=1
+                           [fuse.vmware-vmblock]=1
+                           [fuse.xwmfs]=1
                            [fusectl]=1
                            [hugetlbfs]=1
+                           [ipathfs]=1
                            [mqueue]=1
                            [nfsd]=1
                            [none]=1
+                           [nsfs]=1
+                           [overlay]=1
                            [pipefs]=1
                            [proc]=1
                            [pstore]=1
                            [ramfs]=1
+                           [resctrl]=1
                            [rootfs]=1
                            [rpc_pipefs]=1
                            [securityfs]=1
+                           [selinuxfs]=1
+                           [smackfs]=1
                            [sockfs]=1
                            [spufs]=1
                            [sysfs]=1
-                           [tmpfs]=1)
+                           [tmpfs]=1
+                           [tracefs]=1
+                           [vboxsf]=1
+                           [virtiofs]=1)
 
 # generated from: pkgfile -vbr '/fsck\..+' | awk -F. '{ print $NF }' | sort
 declare -A fsck_types=([btrfs]=1
