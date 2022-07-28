@@ -152,8 +152,8 @@ unshare_teardown() {
   unset CHROOT_ACTIVE_FILES
 }
 
-root_unshare="unshare --fork --pid"
-user_unshare="$root_unshare --mount --map-auto --map-root-user --setuid 0 --setgid 0"
+pid_unshare="unshare --fork --pid"
+mount_unshare="$pid_unshare --mount --map-auto --map-root-user --setuid 0 --setgid 0"
 
 # This outputs code for declaring all variables to stdout. For example, if
 # FOO=BAR, then running

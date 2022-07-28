@@ -17,7 +17,7 @@ copykeyring=1
 copymirrorlist=1
 pacmode=-Sy
 setup=chroot_setup
-unshare="$root_unshare"
+unshare=0
 
 usage() {
   cat <<EOF
@@ -67,7 +67,7 @@ while getopts ':C:cdGiMNU' flag; do
       ;;
     N)
       setup=unshare_setup
-      unshare="$user_unshare"
+      unshare=1
       ;;
     U)
       pacmode=-U
@@ -120,7 +120,7 @@ pacstrap() {
   fi
 
   msg 'Installing packages to %s' "$newroot"
-  if ! pacman -r "$newroot" $pacmode "${pacman_args[@]}"; then
+  if ! $pid_unshare pacman -r "$newroot" $pacmode "${pacman_args[@]}"; then
     die 'Failed to install packages to new root'
   fi
 
@@ -130,6 +130,10 @@ pacstrap() {
   fi
 }
 
-$unshare bash -c "$(declare_all); pacstrap"
+if (( unshare )); then
+  $mount_unshare bash -c "$(declare_all); pacstrap"
+else
+  pacstrap
+fi
 
 # vim: et ts=2 sw=2 ft=sh:
