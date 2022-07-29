@@ -5,7 +5,7 @@ shopt -s extglob
 m4_include(common)
 
 setup=chroot_setup
-unshare="$root_unshare"
+unshare=0
 
 usage() {
   cat <<EOF
@@ -82,7 +82,7 @@ while getopts ':hNu:' flag; do
       ;;
     N)
       setup=unshare_setup
-      unshare="$user_unshare"
+      unshare=1
       ;;
     u)
       userspec=$OPTARG
@@ -116,8 +116,12 @@ arch-chroot() {
   chroot_args=()
   [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
 
-  SHELL=/bin/bash chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
+  SHELL=/bin/bash $pid_unshare chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
 }
 
 args=("$@")
-$unshare bash -c "$(declare_all); arch-chroot"
+if (( unshare )); then
+  $mount_unshare bash -c "$(declare_all); arch-chroot"
+else
+  arch-chroot
+fi
