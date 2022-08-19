@@ -14,6 +14,7 @@ m4_include(common)
 
 hostcache=0
 copykeyring=1
+initkeyring=0
 copymirrorlist=1
 pacmode=-Sy
 setup=chroot_setup
@@ -28,6 +29,7 @@ usage: ${0##*/} [options] root [packages...]
     -c             Use the package cache on the host, rather than the target
     -G             Avoid copying the host's pacman keyring to the target
     -i             Prompt for package confirmation when needed (run interactively)
+    -K             Initialize an empty pacman keyring in the target (implies '-G')
     -M             Avoid copying the host's mirrorlist to the target
     -N             Run in unshare mode as a regular user
     -U             Use pacman -U to install packages
@@ -45,7 +47,7 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':C:cdGiMNU' flag; do
+while getopts ':C:cdGiKMNU' flag; do
   case $flag in
     C)
       pacman_config=$OPTARG
@@ -61,6 +63,9 @@ while getopts ':C:cdGiMNU' flag; do
       ;;
     G)
       copykeyring=0
+      ;;
+    K)
+      initkeyring=1
       ;;
     M)
       copymirrorlist=0
@@ -112,9 +117,11 @@ pacstrap() {
   # mount API filesystems
   $setup "$newroot" || die "failed to setup chroot %s" "$newroot"
 
-  if (( copykeyring )); then
-    # if there's a keyring on the host, copy it into the new root, unless it exists already
-    if [[ -d /etc/pacman.d/gnupg && ! -d $newroot/etc/pacman.d/gnupg ]]; then
+  if [[ ! -d $newroot/etc/pacman.d/gnupg ]]; then
+    if (( initkeyring )); then
+      pacman-key --gpgdir "$newroot"/etc/pacman.d/gnupg --init
+    elif (( copykeyring )) && [[ -d /etc/pacman.d/gnupg ]]; then
+      # if there's a keyring on the host, copy it into the new root
       cp -a --no-preserve=ownership /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
     fi
   fi

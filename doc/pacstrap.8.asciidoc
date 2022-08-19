@@ -34,6 +34,9 @@ Options
 *-i*::
 	Prompt for package confirmation when needed (run interactively).
 
+*-K*::
+	Initialize an empty pacman keyring in the target (implies '-G').
+
 *-M*::
 	Avoid copying the host's mirrorlist to the target.
 
