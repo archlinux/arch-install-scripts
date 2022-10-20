@@ -166,6 +166,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
   if [[ $fsroot != / && $fstype != btrfs ]]; then
     # it's a bind mount
     src=$(findmnt -funcevo TARGET "$src")$fsroot
+    src="/${src#$root/}"
     if [[ $src -ef $target ]]; then
       # hrmm, this is weird. we're probably looking at a file or directory
       # that was bound into a chroot from the host machine. Ignore it,
