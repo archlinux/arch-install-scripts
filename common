@@ -56,7 +56,7 @@ declare -A pseudofs_types=([anon_inodefs]=1
                            [virtiofs]=1)
 
 # generated from: pkgfile -vbr '/fsck\..+' | awk -F. '{ print $NF }' | sort
-declare -A fsck_types=([btrfs]=1
+declare -A fsck_types=([btrfs]=0    # btrfs doesn't need a regular fsck utility
                        [cramfs]=1
                        [erofs]=1
                        [exfat]=1
