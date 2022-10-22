@@ -45,6 +45,9 @@ Options
 	mount and user namespace, allowing regular users to create new system
 	installations.
 
+*-P*::
+	Copy the host's pacman config to the target.
+
 *-U*::
 	Use pacman -U to install packages. Useful for obtaining fine-grained
 	control over the installed packages.

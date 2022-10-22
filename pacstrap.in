@@ -19,6 +19,8 @@ copymirrorlist=1
 pacmode=-Sy
 setup=chroot_setup
 unshare=0
+copyconf=0
+pacman_config=/etc/pacman.conf
 
 usage() {
   cat <<EOF
@@ -32,6 +34,7 @@ usage: ${0##*/} [options] root [packages...]
     -K             Initialize an empty pacman keyring in the target (implies '-G')
     -M             Avoid copying the host's mirrorlist to the target
     -N             Run in unshare mode as a regular user
+    -P             Copy the host's pacman config to the target
     -U             Use pacman -U to install packages
 
     -h             Print this help message
@@ -47,7 +50,7 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':C:cdGiKMNU' flag; do
+while getopts ':C:cdGiKMNPU' flag; do
   case $flag in
     C)
       pacman_config=$OPTARG
@@ -74,6 +77,9 @@ while getopts ':C:cdGiKMNU' flag; do
       setup=unshare_setup
       unshare=1
       ;;
+    P)
+      copyconf=1
+      ;;
     U)
       pacmode=-U
       ;;
@@ -89,7 +95,7 @@ shift $(( OPTIND - 1 ))
 
 (( $# )) || die "No root directory specified"
 newroot=$1; shift
-pacman_args=("${@:-base}")
+pacman_args=("${@:-base}" --config="$pacman_config")
 
 if (( ! hostcache )); then
   pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
@@ -97,10 +103,6 @@ fi
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
-fi
-
-if [[ $pacman_config ]]; then
-  pacman_args+=(--config="$pacman_config")
 fi
 
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
@@ -134,6 +136,10 @@ pacstrap() {
   if (( copymirrorlist )); then
     # install the host's mirrorlist onto the new root
     cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
+  fi
+
+  if (( copyconf )); then
+    cp -a "$pacman_config" "$newroot/etc/pacman.conf"
   fi
 }
 
