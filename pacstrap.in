@@ -16,6 +16,7 @@ hostcache=0
 copykeyring=1
 initkeyring=0
 copymirrorlist=1
+pacman_args=()
 pacmode=-Sy
 setup=chroot_setup
 unshare=0
@@ -29,6 +30,7 @@ usage: ${0##*/} [options] root [packages...]
   Options:
     -C <config>    Use an alternate config file for pacman
     -c             Use the package cache on the host, rather than the target
+    -D             Skip pacman dependency checks
     -G             Avoid copying the host's pacman keyring to the target
     -i             Prompt for package confirmation when needed (run interactively)
     -K             Initialize an empty pacman keyring in the target (implies '-G')
@@ -50,10 +52,13 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':C:cGiKMNPU' flag; do
+while getopts ':C:cDGiKMNPU' flag; do
   case $flag in
     C)
       pacman_config=$OPTARG
+      ;;
+    D)
+      pacman_args+=(-dd)
       ;;
     c)
       hostcache=1
@@ -92,7 +97,7 @@ shift $(( OPTIND - 1 ))
 
 (( $# )) || die "No root directory specified"
 newroot=$1; shift
-pacman_args=("${@:-base}" --config="$pacman_config")
+pacman_args+=("$pacmode" "${@:-base}" --config="$pacman_config")
 
 if (( ! hostcache )); then
   pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
@@ -126,7 +131,7 @@ pacstrap() {
   fi
 
   msg 'Installing packages to %s' "$newroot"
-  if ! $pid_unshare pacman -r "$newroot" $pacmode "${pacman_args[@]}"; then
+  if ! $pid_unshare pacman -r "$newroot" "${pacman_args[@]}"; then
     die 'Failed to install packages to new root'
   fi
 
