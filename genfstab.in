@@ -7,8 +7,8 @@ m4_include(common)
 write_source() {
   local src=$1 spec= label= uuid= comment=()
 
-  label=$(lsblk -rno LABEL "$1" 2>/dev/null)
-  uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
+  label=$(blkid -o value -s LABEL "$1" 2>/dev/null)
+  uuid=$(blkid -o value -s UUID "$1" 2>/dev/null)
 
   # bind mounts do not have a UUID!
 
@@ -29,7 +29,7 @@ write_source() {
     *)
       [[ $uuid ]] && comment=("$1" "UUID=$uuid")
       [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
-      [[ $bytag ]] && spec=$(lsblk -rno "$bytag" "$1" 2>/dev/null)
+      [[ $bytag ]] && spec=$(blkid -o value -s "$bytag" "$1" 2>/dev/null)
       ;;
   esac
 
@@ -183,7 +183,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     fuseblk)
       # well-behaved FUSE filesystems will report themselves as fuse.$fstype.
       # this is probably NTFS-3g, but let's just make sure.
-      if ! newtype=$(lsblk -no FSTYPE "$src") || [[ -z $newtype ]]; then
+      if ! newtype=$(findmnt -no FSTYPE "$src") || [[ -z $newtype ]]; then
         # avoid blanking out fstype, leading to an invalid fstab
         error 'Failed to derive real filesystem type for FUSE device on %s' "$target"
       else
