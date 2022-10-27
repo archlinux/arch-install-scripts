@@ -50,13 +50,10 @@ if [[ -z $1 || $1 = @(-h|--help) ]]; then
   exit $(( $# ? 0 : 1 ))
 fi
 
-while getopts ':C:cdGiKMNPU' flag; do
+while getopts ':C:cGiKMNPU' flag; do
   case $flag in
     C)
       pacman_config=$OPTARG
-      ;;
-    d)
-      # retired flag. does nothing.
       ;;
     c)
       hostcache=1
