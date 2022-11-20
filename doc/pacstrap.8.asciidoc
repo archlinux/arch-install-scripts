@@ -28,6 +28,9 @@ Options
 *-c*::
 	Use the package cache on the host, rather than the target.
 
+*-D*::
+	Skip pacman dependency checks.
+
 *-G*::
 	Avoid copying the host's pacman keyring to the target.
 
