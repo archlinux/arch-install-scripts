@@ -58,6 +58,14 @@ optstring_apply_quirks() {
   fi
 
   case $fstype in
+    btrfs)
+      # Having only one of subvol= and subvolid= is enough for mounting a btrfs subvolume
+      # And having subvolid= set prevents things like 'snapper rollback' to work, as it
+      # updates the subvolume in-place, leaving subvol= unchanged with a different subvolid.
+      if optstring_has_option "$varname" subvol; then
+        optstring_remove_option "$varname" subvolid
+      fi
+      ;;
     f2fs)
       # These are Kconfig options for f2fs. Kernels supporting the options will
       # only provide the negative versions of these (e.g. noacl), and vice versa
