@@ -18,7 +18,9 @@ usage: ${0##*/} [options] chroot_dir [command [arguments...]]
   Options:
     -N                  Run in unshare mode as a regular user
     -u <user>[:group]   Specify non-root user and group (optional) to use
+
     -h                  Print this help message
+
 If 'command' is unspecified, arch-chroot will launch /bin/bash.
 
 Note that when using arch-chroot, the target chroot directory *should* be a
@@ -57,25 +59,25 @@ shift $(( OPTIND - 1 ))
 (( $# )) || die 'No chroot directory specified'
 chrootdir="$1"; shift
 
+if ! mountpoint -q "$chrootdir"; then
+  warning '%s is not a mountpoint, and thus may cause undesirable side effects. (See help for more info)' "$chrootdir"
+fi
+
+command=("$@")
+
 arch-chroot() {
   check_root
 
-  [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
+  [[ -d "$chrootdir" ]] || die '%s: not a directory' "$chrootdir"
 
-  $setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
-  chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
+  $setup "$chrootdir"
+  chroot_add_resolv_conf "$chrootdir" || die 'Failed to setup resolv.conf in chroot'
 
-  if ! mountpoint -q "$chrootdir"; then
-    warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
-  fi
+  [[ $userspec ]] && chroot_args+=(--userspec="$userspec")
 
-  chroot_args=()
-  [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
-
-  SHELL=/bin/bash $pid_unshare chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
+  SHELL=/bin/bash $pid_unshare chroot "${chroot_args[@]}" -- "$chrootdir" "${command[@]}"
 }
 
-args=("$@")
 if (( unshare )); then
   $mount_unshare bash -c "$(declare_all); arch-chroot"
 else
