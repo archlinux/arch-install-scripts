@@ -26,11 +26,11 @@ Options
 *-L*::
 	Use labels for source identifiers (shortcut for '-t LABEL').
 
-*-p*::
-	Exclude pseudofs mounts (default behavior).
-
 *-P*::
 	Include pseudofs mounts.
+
+*-p*::
+	Exclude pseudofs mounts (default behavior).
 
 *-t* <tag>::
 	Use 'tag' for source identifiers (should be one of: 'LABEL', 'UUID',
@@ -45,4 +45,4 @@ Options
 See Also
 --------
 
-linkman:pacman[8]
+linkman:fstab[5], linkman:file-hierarchy[7], linkman:filesystems[5]

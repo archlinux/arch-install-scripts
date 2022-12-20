@@ -7,27 +7,25 @@ arch-chroot - enhanced chroot command
 
 Synopsis
 --------
-arch-chroot [options] chroot-dir [command] [arguments...]
+arch-chroot [options] chroot_dir [command [arguments...]]
 
 Description
 -----------
 arch-chroot wraps the linkman:chroot[1] command while ensuring that important
-functionality is available, e.g. mounting '/dev/', '/proc' and other API
+functionality is available, e.g. mounting '/dev', '/proc' and other API
 filesystems, or exposing linkman:resolv.conf[5] to the chroot.
 
 If 'command' is unspecified, arch-chroot will launch */bin/bash*.
 
 [NOTE]
 ======
-The target chroot-dir *should* be a mountpoint. This ensures that tools such as
-linkman:pacman[8] or linkman:findmnt[8] have an accurate hierarchy of the
-mounted filesystems within the chroot. If your chroot target is not a
-mountpoint, you can bind mount the directory on itself to make it a mountpoint,
-i.e.:
+The target chroot directory *should* be a mountpoint. This ensures that tools
+such as linkman:pacman[8] or linkman:findmnt[8] have an accurate hierarchy of
+the mounted filesystems within the chroot. If your chroot target is not a
+mountpoint, you can bind mount the directory on itself to make it a one, i.e.
 
-'mount --bind /your/chroot /your/chroot'
+'mount --bind chroot_dir chroot_dir'
 ======
-
 
 Options
 -------
@@ -38,7 +36,7 @@ Options
 	installations.
 
 *-u <user>[:group]*::
-	Specify non-root user and optional group to use.
+	Specify non-root user and group (optional) to use.
 
 *-h*::
 	Output syntax and command line options.
@@ -46,4 +44,4 @@ Options
 See Also
 --------
 
-linkman:pacman[8]
+linkman:chroot[1], linkman:proc[5], linkman:sysfs[5]
