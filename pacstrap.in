@@ -10,18 +10,20 @@
 
 shopt -s extglob
 
+# m4_include() is recognized as a function definition
+# shellcheck source=common disable=SC1073,SC1065,SC1064,SC1072
 m4_include(common)
 
 hostcache=0
 copykeyring=1
 initkeyring=0
 copymirrorlist=1
+copyconfig=0
+pacman_config=/etc/pacman.conf
 pacman_args=()
-pacmode=-Sy
+pacmode='-Sy'
 setup=chroot_setup
 unshare=0
-copyconf=0
-pacman_config=/etc/pacman.conf
 
 usage() {
   cat <<EOF
@@ -37,12 +39,12 @@ usage: ${0##*/} [options] root [packages...]
     -M             Avoid copying the host's mirrorlist to the target
     -N             Run in unshare mode as a regular user
     -P             Copy the host's pacman config to the target
-    -U             Use pacman -U to install packages
+    -U             Use 'pacman -U' to install packages
 
     -h             Print this help message
 
-pacstrap installs packages to the specified new root directory. If no packages
-are given, pacstrap defaults to the "base" group.
+pacstrap installs packages to the specified new root directory.
+If no packages are given, pacstrap defaults to the 'base' metapackage.
 
 EOF
 }
@@ -55,19 +57,19 @@ fi
 while getopts ':C:cDGiKMNPU' flag; do
   case $flag in
     C)
-      pacman_config=$OPTARG
-      ;;
-    D)
-      pacman_args+=(-dd)
+      pacman_config="$OPTARG"
       ;;
     c)
       hostcache=1
       ;;
-    i)
-      interactive=1
+    D)
+      pacman_args+=(-dd)
       ;;
     G)
       copykeyring=0
+      ;;
+    i)
+      interactive=1
       ;;
     K)
       initkeyring=1
@@ -80,23 +82,23 @@ while getopts ':C:cDGiKMNPU' flag; do
       unshare=1
       ;;
     P)
-      copyconf=1
+      copyconfig=1
       ;;
     U)
-      pacmode=-U
+      pacmode='-U'
       ;;
     :)
-      die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: option requires an argument -- '%s'" "${0##*/}" "$OPTARG"
       ;;
     ?)
-      die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: invalid option -- '%s'" "${0##*/}" "$OPTARG"
       ;;
   esac
 done
 shift $(( OPTIND - 1 ))
 
-(( $# )) || die "No root directory specified"
-newroot=$1; shift
+(( $# )) || die 'No root directory specified'
+newroot="$1"; shift
 pacman_args+=("$pacmode" "${@:-base}" --config="$pacman_config")
 
 if (( ! hostcache )); then
@@ -131,16 +133,14 @@ pacstrap() {
   fi
 
   msg 'Installing packages to %s' "$newroot"
-  if ! $pid_unshare pacman -r "$newroot" "${pacman_args[@]}"; then
-    die 'Failed to install packages to new root'
-  fi
+  $pid_unshare pacman --root "$newroot" "${pacman_args[@]}" || die 'Failed to install packages to new root'
 
   if (( copymirrorlist )); then
     # install the host's mirrorlist onto the new root
     cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
   fi
 
-  if (( copyconf )); then
+  if (( copyconfig )); then
     cp -a "$pacman_config" "$newroot/etc/pacman.conf"
   fi
 }

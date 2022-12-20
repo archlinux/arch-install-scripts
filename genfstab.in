@@ -1,7 +1,10 @@
 #!/bin/bash
+# shellcheck disable=SC2154 # optstring_*_option may export variables in runtime
 
 shopt -s extglob
 
+# m4_include() is recognized as a function definition
+# shellcheck source=common disable=SC1073,SC1065,SC1064,SC1072
 m4_include(common)
 
 write_source() {
@@ -43,7 +46,7 @@ write_source() {
 }
 
 optstring_apply_quirks() {
-  local varname=$1 fstype=$2
+  local varname="$1" fstype="$2"
 
   # SELinux displays a 'seclabel' option in /proc/self/mountinfo. We can't know
   # if the system we're generating the fstab for has any support for SELinux (as
@@ -92,13 +95,13 @@ usage: ${0##*/} [options] root
     -p             Exclude pseudofs mounts (default behavior)
     -P             Include pseudofs mounts
     -t <tag>       Use TAG for source identifiers (TAG should be one of: LABEL,
-                      UUID, PARTLABEL, PARTUUID)
+                       UUID, PARTLABEL, PARTUUID)
     -U             Use UUIDs for source identifiers (shortcut for -t UUID)
 
     -h             Print this help message
 
-genfstab generates output suitable for addition to an fstab file based on the
-devices mounted under the mountpoint specified by the given root.
+genfstab generates output suitable for addition to an fstab file based on
+the devices mounted under the mountpoint specified by the given root.
 
 EOF
 }
@@ -110,14 +113,11 @@ fi
 
 while getopts ':f:LPpt:U' flag; do
   case $flag in
+    f)
+      prefixfilter="$OPTARG"
+      ;;
     L)
       bytag=LABEL
-      ;;
-    U)
-      bytag=UUID
-      ;;
-    f)
-      prefixfilter=$OPTARG
       ;;
     P)
       pseudofs=1
@@ -126,42 +126,45 @@ while getopts ':f:LPpt:U' flag; do
       pseudofs=0
       ;;
     t)
-      bytag=${OPTARG^^}
+      bytag="${OPTARG^^}"
+      ;;
+    U)
+      bytag=UUID
       ;;
     :)
-      die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: option requires an argument -- '%s'" "${0##*/}" "$OPTARG"
       ;;
     ?)
-      die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: invalid option -- '%s'" "${0##*/}" "$OPTARG"
       ;;
   esac
 done
 shift $(( OPTIND - 1 ))
 
-(( $# )) || die "No root directory specified"
-root=$(realpath -mL "$1"); shift
+(( $# )) || die 'No root directory specified'
+root="$(realpath -mL "$1")"; shift
 
 if ! mountpoint -q "$root"; then
-  die "$root is not a mountpoint"
+  die '%s: not a mountpoint' "$root"
 fi
 
 # handle block devices
 findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     while read -r src target fstype opts fsroot; do
-  if (( !pseudofs )) && fstype_is_pseudofs "$fstype"; then
+  if (( ! pseudofs )) && fstype_is_pseudofs "$fstype"; then
     continue
   fi
 
-  [[ $target = "$prefixfilter"* ]] || continue
+  [[ "$target" = "$prefixfilter"* ]] || continue
 
   # default 5th and 6th columns
   dump=0 pass=2
 
-  src=$(unmangle "$src")
-  target=$(unmangle "$target")
-  target=${target#$root}
+  src="$(unmangle "$src")"
+  target="$(unmangle "$target")"
+  target="/${target#"$root/"}"
 
-  if (( !foundroot )) && findmnt "$src" "$root" >/dev/null; then
+  if (( ! foundroot )) && findmnt "$src" "$root" >/dev/null; then
     # this is root. we can't possibly have more than one...
     pass=1 foundroot=1
   fi
@@ -171,7 +174,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     pass=0
   fi
 
-  if [[ $fsroot != / && $fstype != btrfs ]]; then
+  if [[ "$fsroot" != "/" && "$fstype" != "btrfs" ]]; then
     # it's a bind mount
     src=$(findmnt -funcevo TARGET "$src")$fsroot
     src="/${src#$root/}"
@@ -183,7 +186,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
       continue
     fi
     fstype=none
-    opts+=,bind
+    opts+=',bind'
     pass=0
   fi
 
@@ -192,20 +195,20 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
     fuseblk)
       # well-behaved FUSE filesystems will report themselves as fuse.$fstype.
       # this is probably NTFS-3g, but let's just make sure.
-      if ! newtype=$(lsblk -no FSTYPE "$src") || [[ -z $newtype ]]; then
+      if ! newtype="$(lsblk -no FSTYPE "$src")" || [[ -z $newtype ]]; then
         # avoid blanking out fstype, leading to an invalid fstab
         error 'Failed to derive real filesystem type for FUSE device on %s' "$target"
       else
-        fstype=$newtype
+        fstype="$newtype"
       fi
       ;;
   esac
 
-  optstring_apply_quirks "opts" "$fstype"
+  optstring_apply_quirks opts "$fstype"
 
   # write one line
   write_source "$src"
-  printf '\t%-10s' "/$(mangle "${target#/}")" "$fstype" "$opts"
+  printf '\t%-10s' "$(mangle "$target")" "$fstype" "$opts"
   printf '\t%s %s' "$dump" "$pass"
   printf '\n\n'
 done
@@ -213,20 +216,20 @@ done
 # handle swaps devices
 {
   # ignore header
-  read
+  read -r
 
   while read -r device type _ _ prio; do
     options=defaults
     if (( prio >= 0 )); then
-      options+=,pri=$prio
+      options+=",pri=$prio"
     fi
 
     # skip files marked deleted by the kernel
-    [[ $device = *'\040(deleted)' ]] && continue
+    [[ "$device" = *'\040(deleted)' ]] && continue
 
-    if [[ $type = file ]]; then
-      printf '%-20s' "${device#${root%/}}"
-    elif [[ $device = /dev/dm-+([0-9]) ]]; then
+    if [[ "$type" = "file" ]]; then
+      printf '%-20s' "${device#"${root%/}"}"
+    elif [[ "$device" = "/dev/dm-"+([0-9]) ]]; then
       # device mapper doesn't allow characters we need to worry
       # about being mangled, and it does the escaping of dashes
       # for us in sysfs.
@@ -235,7 +238,7 @@ done
       write_source "$(unmangle "$device")"
     fi
 
-    printf '\t%-10s\t%-10s\t%-10s\t0 0\n\n' 'none' 'swap' "$options"
+    printf '\t%-10s\t%-10s\t%-10s\t0 0\n\n' none swap "$options"
   done
 } </proc/swaps
 

@@ -3,7 +3,7 @@ _genfstab() {
     local cur prev words cword
     _init_completion || return
 
-    local opts="-f -L -p -P -t -U -h"
+    local opts="-f -L -P -p -t -U -h"
 
     case ${prev} in
         -f)

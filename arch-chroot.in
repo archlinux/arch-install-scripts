@@ -2,27 +2,30 @@
 
 shopt -s extglob
 
+# m4_include() is recognized as a function definition
+# shellcheck source=common disable=SC1073,SC1065,SC1064,SC1072
 m4_include(common)
 
 setup=chroot_setup
 unshare=0
+userspec=''
+chroot_args=()
 
 usage() {
   cat <<EOF
-usage: ${0##*/} chroot-dir [command] [arguments...]
+usage: ${0##*/} [options] chroot_dir [command [arguments...]]
 
-    -h                  Print this help message
+  Options:
     -N                  Run in unshare mode as a regular user
-    -u <user>[:group]   Specify non-root user and optional group to use
-
-If 'command' is unspecified, ${0##*/} will launch /bin/bash.
+    -u <user>[:group]   Specify non-root user and group (optional) to use
+    -h                  Print this help message
+If 'command' is unspecified, arch-chroot will launch /bin/bash.
 
 Note that when using arch-chroot, the target chroot directory *should* be a
 mountpoint. This ensures that tools such as pacman(8) or findmnt(8) have an
 accurate hierarchy of the mounted filesystems within the chroot.
-
 If your chroot target is not a mountpoint, you can bind mount the directory on
-itself to make it a mountpoint, i.e. 'mount --bind /your/chroot /your/chroot'.
+itself to make it one, i.e. 'mount --bind chroot_dir chroot_dir'.
 
 EOF
 }
@@ -74,32 +77,32 @@ chroot_add_resolv_conf() {
   chroot_add_mount "$src" "$dest" --bind
 }
 
-while getopts ':hNu:' flag; do
+if [[ -z $1 || $1 = @(-h|--help) ]]; then
+  usage
+  exit $(( $# ? 0 : 1 ))
+fi
+
+while getopts ':Nu:' flag; do
   case $flag in
-    h)
-      usage
-      exit 0
-      ;;
     N)
       setup=unshare_setup
       unshare=1
       ;;
     u)
-      userspec=$OPTARG
+      userspec="$OPTARG"
       ;;
     :)
-      die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: option requires an argument -- '%s'" "${0##*/}" "$OPTARG"
       ;;
     ?)
-      die '%s: invalid option -- '\''%s'\' "${0##*/}" "$OPTARG"
+      die "%s: invalid option -- '%s'" "${0##*/}" "$OPTARG"
       ;;
   esac
 done
 shift $(( OPTIND - 1 ))
 
 (( $# )) || die 'No chroot directory specified'
-chrootdir=$1
-shift
+chrootdir="$1"; shift
 
 arch-chroot() {
   (( EUID == 0 )) || die 'This script must be run with root privileges'
@@ -125,3 +128,5 @@ if (( unshare )); then
 else
   arch-chroot
 fi
+
+# vim: et ts=2 sw=2 ft=sh:
