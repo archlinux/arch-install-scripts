@@ -47,5 +47,3 @@ See Also
 --------
 
 linkman:pacman[8]
-
-include::footer.asciidoc[]

@@ -26,7 +26,7 @@ edit = $(V_GEN) m4 -P $@.in >$@ && chmod go-w,+x $@
 %: %.in common
 	$(edit)
 
-doc/%: doc/%.asciidoc doc/asciidoc.conf doc/footer.asciidoc
+doc/%: doc/%.asciidoc doc/asciidoc.conf
 	$(V_GEN) a2x --no-xmllint --asciidoc-opts="-f doc/asciidoc.conf" -d manpage -f manpage -D doc $<
 
 clean:
