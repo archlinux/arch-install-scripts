@@ -7,41 +7,38 @@ shopt -s extglob
 # shellcheck source=common disable=SC1073,SC1065,SC1064,SC1072
 m4_include(common)
 
+bytag=src
+pseudofs=0
+
 write_source() {
-  local src=$1 spec= label= uuid= comment=()
+  local src spec comments=()
 
-  label=$(lsblk -rno LABEL "$1" 2>/dev/null)
-  uuid=$(lsblk -rno UUID "$1" 2>/dev/null)
+  src="$(mangle "$1")"
+  local -A sources=([LABEL]="$(mangle "$(lsblk -rno LABEL "$1" 2>/dev/null)")"
+                    [UUID]="$(lsblk -rno UUID "$1" 2>/dev/null)"
+                    [PARTLABEL]="$(mangle "$(lsblk -rno PARTLABEL "$1" 2>/dev/null)")"
+                    [PARTUUID]="$(lsblk -rno PARTUUID "$1" 2>/dev/null)"
+  )
 
-  # bind mounts do not have a UUID!
-
-  case $bytag in
-    '')
-      [[ $uuid ]] && comment=("UUID=$uuid")
-      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
-      ;;
-    LABEL)
-      spec=$label
-      [[ $uuid ]] && comment=("$src" "UUID=$uuid")
-      ;;
-    UUID)
-      spec=$uuid
-      comment=("$src")
-      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
-      ;;
-    *)
-      [[ $uuid ]] && comment=("$1" "UUID=$uuid")
-      [[ $label ]] && comment+=("LABEL=$(mangle "$label")")
-      [[ $bytag ]] && spec=$(lsblk -rno "$bytag" "$1" 2>/dev/null)
-      ;;
-  esac
-
-  [[ $comment ]] && printf '# %s\n' "${comment[*]}"
-
-  if [[ $spec ]]; then
-    printf '%-20s' "$bytag=$(mangle "$spec")"
+  if [[ ${sources["$bytag"]} ]]; then
+    spec="$bytag"
+    comments+=("$src")
   else
-    printf '%-20s' "$(mangle "$src")"
+    spec=src
+  fi
+
+  for tag in "${!sources[@]}"; do
+    if [[ ${sources["$tag"]} && "$tag" != "$spec" ]]; then
+      comments+=("$tag=${sources["$tag"]}")
+    fi
+  done
+
+  (( ${#comments[@]} )) && printf '# %s\n' "${comments[*]}"
+
+  if [[ "$spec" != "src" ]]; then
+    printf '%-20s' "$spec=${sources["$spec"]}"
+  else
+    printf '%-20s' "$src"
   fi
 }
 
