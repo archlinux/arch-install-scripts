@@ -53,7 +53,7 @@ optstring_apply_quirks() {
   # Prune 'relatime' option for any pseudofs. This seems to be a rampant
   # default which the kernel often exports even if the underlying filesystem
   # doesn't support it. Example: https://bugs.archlinux.org/task/54554.
-  if awk -v fstype="$fstype" '$1 == fstype { exit 1 }' /proc/filesystems; then
+  if fstype_is_pseudofs "$fstype"; then
     optstring_remove_option "$varname" relatime
   fi
 

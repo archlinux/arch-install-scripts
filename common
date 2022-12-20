@@ -436,11 +436,12 @@ dm_name_for_devnode() {
 }
 
 fstype_is_pseudofs() {
-  (( pseudofs_types["$1"] ))
+  (( pseudofs_types["$1"] )) || findmnt --pseudo "$1" &>/dev/null
 }
 
 fstype_has_fsck() {
-  (( fsck_types["$1"] ))
+  (( fsck_types["$1"] == 0 )) && return 1
+  (( fsck_types["$1"] )) || command -v "fsck.$1" &>/dev/null
 }
 
 # vim: et ts=2 sw=2 ft=sh:
