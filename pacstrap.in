@@ -112,7 +112,7 @@ fi
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
 
 pacstrap() {
-  (( EUID == 0 )) || die 'This script must be run with root privileges'
+  check_root
 
   # create obligatory directories
   msg 'Creating install root at %s' "$newroot"

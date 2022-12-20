@@ -102,6 +102,10 @@ rev_array() {
   mapfile -t _arr < <(printf '%s\n' "${_arr[@]}" | tac)
 }
 
+check_root() {
+  (( EUID == 0 )) || die 'This script must be run with root privileges'
+}
+
 resolve_link() {
   local link="$1" root="$2" target
 
