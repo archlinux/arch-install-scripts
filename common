@@ -103,6 +103,35 @@ rev_array() {
   mapfile -t _arr < <(printf '%s\n' "${_arr[@]}" | tac)
 }
 
+resolve_link() {
+  local link="$1" root="$2" target
+
+  if [[ ! $root ]]; then
+    target="$(realpath -eq "$link")"
+  else
+    # This is tricky to do. We read from $link in a loop
+    # and prepend it with $root if it's not under it.
+    # This can't handle e.g. $root is /mnt and $link
+    # is /mnt/1 pointing to /mnt/2, which should actually
+    # be /mnt/mnt/2. Luckily these edge cases shouldn't
+    # bother most of the time.
+
+    root="$(realpath -e "$root")"
+    target="$link"
+    while [[ -L "$target" ]]; do
+      target="$(readlink -m "$target")"
+      if [[ "$target" != "$root"/* ]]; then
+        target="$root/${target#/}"
+      fi
+    done
+
+    # Normalize the path and make sure the resolved target exists
+    target="$(realpath -eq "$target")"
+  fi
+
+  printf '%s' "$target"
+}
+
 chroot_add_mount() {
   mount "$@" && CHROOT_ACTIVE_MOUNTS+=("$2")
 }
@@ -128,6 +157,27 @@ chroot_add_link() {
   ln -sf "$1" "$2" && CHROOT_ACTIVE_FILES+=("$2")
 }
 
+chroot_add_resolv_conf() {
+  local src="$(resolve_link /etc/resolv.conf)" dest="$1/etc/resolv.conf"
+
+  # If we don't have a source resolv.conf file, there's nothing useful we can do.
+  if [[ ! -f "$src" ]]; then
+    warning 'Cannot find a usable resolv.conf. DNS requests might fail in chroot'
+    return 0
+  fi
+
+  # If resolv.conf in the chroot is a symlink, we make a backup of it
+  # and create a plain file so we can bind mount to it.
+  # The backup is restore during chroot_teardown().
+
+  if [[ -L "$dest" ]]; then
+    mv "$dest" "$dest.orig"
+  fi
+  touch -a "$dest"
+
+  chroot_add_mount "$src" "$dest" --bind
+}
+
 chroot_setup() {
   CHROOT_ACTIVE_MOUNTS=()
   [[ $(trap -p EXIT) ]] && die '(BUG): attempting to overwrite existing EXIT trap'
@@ -145,11 +195,17 @@ chroot_setup() {
 }
 
 chroot_teardown() {
+  local root="$1"
+
   if (( ${#CHROOT_ACTIVE_MOUNTS[@]} )); then
     rev_array CHROOT_ACTIVE_MOUNTS
     umount "${CHROOT_ACTIVE_MOUNTS[@]}"
   fi
   unset CHROOT_ACTIVE_MOUNTS
+
+  if [[ -L "$root"/etc/resolv.conf.orig ]]; then
+    mv "$root"/etc/resolv.conf.orig "$root"/etc/resolv.conf
+  fi
 }
 
 unshare_setup() {
@@ -175,7 +231,7 @@ unshare_setup() {
 }
 
 unshare_teardown() {
-  chroot_teardown
+  chroot_teardown "$1"
 
   if (( ${#CHROOT_ACTIVE_LAZY[@]} )); then
     rev_array CHROOT_ACTIVE_LAZY

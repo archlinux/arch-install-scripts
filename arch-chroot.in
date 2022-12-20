@@ -30,53 +30,6 @@ itself to make it one, i.e. 'mount --bind chroot_dir chroot_dir'.
 EOF
 }
 
-resolve_link() {
-  local target=$1
-  local root=$2
-
-  # If a root was given, make sure it ends in a slash.
-  [[ -n $root && $root != */ ]] && root=$root/
-
-  while [[ -L $target ]]; do
-    target=$(readlink -m "$target")
-    # If a root was given, make sure the target is under it.
-    # Make sure to strip any leading slash from target first.
-    [[ -n $root && $target != $root* ]] && target=$root${target#/}
-  done
-
-  printf %s "$target"
-}
-
-chroot_add_resolv_conf() {
-  local chrootdir=$1
-  local src=$(resolve_link /etc/resolv.conf)
-  local dest=$(resolve_link "$chrootdir/etc/resolv.conf" "$chrootdir")
-
-  # If we don't have a source resolv.conf file, there's nothing useful we can do.
-  [[ -e $src ]] || return 0
-
-  if [[ ! -e $dest ]]; then
-    # There are two reasons the destination might not exist:
-    #
-    #   1. There may be no resolv.conf in the chroot.  In this case, $dest won't exist,
-    #      and it will be equal to $1/etc/resolv.conf.  In this case, we'll just exit.
-    #      The chroot environment must not be concerned with DNS resolution.
-    #
-    #   2. $1/etc/resolv.conf is (or resolves to) a broken link.  The environment
-    #      clearly intends to handle DNS resolution, but something's wrong.  Maybe it
-    #      normally creates the target at boot time.  We'll (try to) take care of it by
-    #      creating a dummy file at the target, so that we have something to bind to.
-
-    # Case 1.
-    [[ $dest = $chrootdir/etc/resolv.conf ]] && return 0
-
-    # Case 2.
-    install -Dm644 /dev/null "$dest" || return 1
-  fi
-
-  chroot_add_mount "$src" "$dest" --bind
-}
-
 if [[ -z $1 || $1 = @(-h|--help) ]]; then
   usage
   exit $(( $# ? 0 : 1 ))
