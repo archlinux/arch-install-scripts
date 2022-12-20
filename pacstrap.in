@@ -99,36 +99,55 @@ shift $(( OPTIND - 1 ))
 
 (( $# )) || die 'No root directory specified'
 newroot="$1"; shift
-pacman_args+=("$pacmode" "${@:-base}" --config="$pacman_config")
+[[ -d "$newroot" ]] || die '%s: not a directory' "$newroot"
 
-if (( ! hostcache )); then
-  pacman_args+=(--cachedir="$newroot/var/cache/pacman/pkg")
-fi
+pacman_args+=("$pacmode" "${@:-base}" --config="$pacman_config")
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
 fi
 
-[[ -d $newroot ]] || die "%s is not a directory" "$newroot"
+set -e
+gpgdir="$(pacman-conf --config="$pacman_config" GPGDir)"
+cachedir="$(pacman-conf --config="$pacman_config" CacheDir)"
+if (( copyconfig )); then
+  dbpath="$newroot$(pacman-conf --config="$pacman_config" DBPath)"
+  logfile="$newroot$(pacman-conf --config="$pacman_config" LogFile)"
+  cachedir_target="$newroot$cachedir"
+  gpgdir_target="$newroot$gpgdir"
+
+  pacman_args+=(--dbpath="$dbpath" --logfile="$logfile")
+else
+  dbpath="$newroot"/var/lib/pacman
+  logfile="$newroot"/var/log/pacman.log
+  cachedir_target="$newroot"/var/cache/pacman/pkg
+  gpgdir_target="$newroot"/etc/pacman.d/gnupg
+fi
+
+if (( ! hostcache )); then
+  cachedir="$cachedir_target"
+fi
+pacman_args+=(--cachedir="$cachedir")
+set +e
 
 pacstrap() {
   check_root
 
   # create obligatory directories
   msg 'Creating install root at %s' "$newroot"
-  mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc/pacman.d}
+  mkdir -m 0755 -p "$dbpath" "$cachedir_target" "$(dirname "$logfile")" "$newroot"/{dev,run,etc/pacman.d}
   mkdir -m 1777 -p "$newroot"/tmp
   mkdir -m 0555 -p "$newroot"/{sys,proc}
 
   # mount API filesystems
-  $setup "$newroot" || die "failed to setup chroot %s" "$newroot"
+  $setup "$newroot"
 
-  if [[ ! -d $newroot/etc/pacman.d/gnupg ]]; then
+  if [[ ! -d "$gpgdir_target" ]]; then
     if (( initkeyring )); then
-      pacman-key --gpgdir "$newroot"/etc/pacman.d/gnupg --init
-    elif (( copykeyring )) && [[ -d /etc/pacman.d/gnupg ]]; then
+      pacman-key --gpgdir "$gpgdir_target" --init
+    elif (( copykeyring )) && [[ -d "$gpgdir" ]]; then
       # if there's a keyring on the host, copy it into the new root
-      cp -a --no-preserve=ownership /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
+      cp -aT --no-preserve=ownership "$gpgdir" "$gpgdir_target"
     fi
   fi
 
@@ -137,11 +156,11 @@ pacstrap() {
 
   if (( copymirrorlist )); then
     # install the host's mirrorlist onto the new root
-    cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
+    cp -a /etc/pacman.d/mirrorlist "$newroot"/etc/pacman.d/ || warning "Failed to copy the host's mirrorlist to new root"
   fi
 
   if (( copyconfig )); then
-    cp -a "$pacman_config" "$newroot/etc/pacman.conf"
+    cp -a "$pacman_config" "$newroot"/etc/pacman.conf
   fi
 }
 
