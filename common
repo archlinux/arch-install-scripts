@@ -84,8 +84,7 @@ error() { out "==> ERROR:" "$@"; } >&2
 die() { error "$@"; exit 1; }
 
 ignore_error() {
-  "$@" 2>/dev/null
-  return 0
+  "$@" 2>/dev/null || return 0
 }
 
 in_array() {
@@ -180,18 +179,31 @@ chroot_add_resolv_conf() {
 
 chroot_setup() {
   CHROOT_ACTIVE_MOUNTS=()
-  [[ $(trap -p EXIT) ]] && die '(BUG): attempting to overwrite existing EXIT trap'
-  trap 'chroot_teardown' EXIT
+  local root="$1"
+  local errtrap_old="$(trap -p ERR)" shellopts_old="$SHELLOPTS"
 
-  chroot_add_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
-  chroot_add_mount sys "$1/sys" -t sysfs -o nosuid,noexec,nodev,ro &&
-  ignore_error chroot_maybe_add_mount "[[ -d '$1/sys/firmware/efi/efivars' ]]" \
-      efivarfs "$1/sys/firmware/efi/efivars" -t efivarfs -o nosuid,noexec,nodev &&
-  chroot_add_mount udev "$1/dev" -t devtmpfs -o mode=0755,nosuid &&
-  chroot_add_mount devpts "$1/dev/pts" -t devpts -o mode=0620,gid=5,nosuid,noexec &&
-  chroot_add_mount shm "$1/dev/shm" -t tmpfs -o mode=1777,nosuid,nodev &&
-  chroot_add_mount run "$1/run" -t tmpfs -o nosuid,nodev,mode=0755 &&
-  chroot_add_mount tmp "$1/tmp" -t tmpfs -o mode=1777,strictatime,nodev,nosuid
+  [[ $(trap -p EXIT) ]] && die 'An EXIT trap already exists (likely a bug)'
+  trap "chroot_teardown $root" EXIT
+
+  trap "$errtrap_old; die 'Failed to setup chroot %s' '$root'" ERR
+  set -e
+
+  chroot_add_mount proc "$root"/proc -t proc -o nosuid,noexec,nodev
+  chroot_add_mount sys "$root"/sys -t sysfs -o nosuid,noexec,nodev,ro
+  ignore_error chroot_maybe_add_mount "[[ -d '$root/sys/firmware/efi/efivars' ]]" \
+      efivarfs "$root"/sys/firmware/efi/efivars -t efivarfs -o nosuid,noexec,nodev
+  chroot_add_mount udev "$root"/dev -t devtmpfs -o mode=0755,nosuid
+  chroot_add_mount devpts "$root"/dev/pts -t devpts -o mode=0620,gid=5,nosuid,noexec
+  chroot_add_mount shm "$root"/dev/shm -t tmpfs -o mode=1777,nosuid,nodev
+  chroot_add_mount run "$root"/run -t tmpfs -o nosuid,nodev,mode=0755
+  chroot_add_mount tmp "$root"/tmp -t tmpfs -o mode=1777,strictatime,nodev,nosuid
+
+  [[ "$shellopts_old" = *'errexit'* ]] || set +e
+  if [[ $errtrap_old ]]; then
+    trap "$errtrap_old" ERR
+  else
+    trap - ERR
+  fi
 }
 
 chroot_teardown() {
@@ -210,24 +222,37 @@ chroot_teardown() {
 
 unshare_setup() {
   CHROOT_ACTIVE_MOUNTS=() CHROOT_ACTIVE_LAZY=() CHROOT_ACTIVE_FILES=()
-  [[ $(trap -p EXIT) ]] && die '(BUG): attempting to overwrite existing EXIT trap'
-  trap 'unshare_teardown' EXIT
+  local root="$1"
+  local errtrap_old="$(trap -p ERR)" shellopts_old="$SHELLOPTS"
 
-  chroot_add_mount_lazy "$1" "$1" --bind &&
-  chroot_add_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
-  chroot_add_mount_lazy /sys "$1/sys" --rbind &&
-  chroot_add_link "$1/proc/self/fd" "$1/dev/fd" &&
-  chroot_add_link "$1/proc/self/fd/0" "$1/dev/stdin" &&
-  chroot_add_link "$1/proc/self/fd/1" "$1/dev/stdout" &&
-  chroot_add_link "$1/proc/self/fd/2" "$1/dev/stderr" &&
-  chroot_bind_device /dev/full "$1/dev/full" &&
-  chroot_bind_device /dev/null "$1/dev/null" &&
-  chroot_bind_device /dev/random "$1/dev/random" &&
-  chroot_bind_device /dev/tty "$1/dev/tty" &&
-  chroot_bind_device /dev/urandom "$1/dev/urandom" &&
-  chroot_bind_device /dev/zero "$1/dev/zero" &&
-  chroot_add_mount run "$1/run" -t tmpfs -o nosuid,nodev,mode=0755 &&
-  chroot_add_mount tmp "$1/tmp" -t tmpfs -o mode=1777,strictatime,nodev,nosuid
+  [[ $(trap -p EXIT) ]] && die 'An EXIT trap already exists (likely a bug)'
+  trap "unshare_teardown $root" EXIT
+
+  trap "$errtrap_old; die 'Failed to setup chroot %s' '$root'" ERR
+  set -e
+
+  chroot_add_mount_lazy "$root" "$root" --bind
+  chroot_add_mount proc "$root"/proc -t proc -o nosuid,noexec,nodev
+  chroot_add_mount_lazy /sys "$root"/sys --rbind
+  chroot_add_link "$root"/proc/self/fd "$root"/dev/fd
+  chroot_add_link "$root"/proc/self/fd/0 "$root"/dev/stdin
+  chroot_add_link "$root"/proc/self/fd/1 "$root"/dev/stdout
+  chroot_add_link "$root"/proc/self/fd/2 "$root"/dev/stderr
+  chroot_bind_device /dev/full "$root"/dev/full
+  chroot_bind_device /dev/null "$root"/dev/null
+  chroot_bind_device /dev/zero "$root"/dev/zero
+  chroot_bind_device /dev/random "$root"/dev/random
+  chroot_bind_device /dev/urandom "$root"/dev/urandom
+  chroot_bind_device /dev/tty "$root"/dev/tty
+  chroot_add_mount run "$root"/run -t tmpfs -o nosuid,nodev,mode=0755
+  chroot_add_mount tmp "$root"/tmp -t tmpfs -o mode=1777,strictatime,nodev,nosuid
+
+  [[ "$shellopts_old" = *'errexit'* ]] || set +e
+  if [[ $errtrap_old ]]; then
+    trap "$errtrap_old" ERR
+  else
+    trap - ERR
+  fi
 }
 
 unshare_teardown() {
