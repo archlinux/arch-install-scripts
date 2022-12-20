@@ -159,7 +159,8 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
 
   src="$(unmangle "$src")"
   target="$(unmangle "$target")"
-  target="/${target#"$root/"}"
+  target="${target#"$root/"}"
+  [[ "$target" != '/'* ]] && target="/$target"
 
   if (( ! foundroot )) && findmnt "$src" "$root" >/dev/null; then
     # this is root. we can't possibly have more than one...
@@ -173,15 +174,25 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
 
   if [[ "$fsroot" != "/" && "$fstype" != "btrfs" ]]; then
     # it's a bind mount
-    src=$(findmnt -funcevo TARGET "$src")$fsroot
-    src="/${src#$root/}"
-    if [[ $src -ef $target ]]; then
+    mapfile -t bind_srcs < <(findmnt -uncevo TARGET "$src")
+    for bind_src in "${bind_srcs[@]}"; do
+      if [[ -d "$bind_src$fsroot" ]]; then
+        src="$bind_src$fsroot"
+        break
+      fi
+    done
+
+    src="${src#"$root/"}"
+    [[ "$src" != '/'* ]] && src="/$src"
+
+    if [[ "$src" = "$target" ]]; then
       # hrmm, this is weird. we're probably looking at a file or directory
       # that was bound into a chroot from the host machine. Ignore it,
       # because this won't actually be a valid mount. Worst case, the user
       # just re-adds it.
       continue
     fi
+
     fstype=none
     opts+=',bind'
     pass=0
