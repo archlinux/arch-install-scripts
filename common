@@ -314,10 +314,10 @@ optstring_prepend_option() {
 }
 
 optstring_get_option() {
-  local opts o
+  local _opts o
 
-  IFS=, read -ra opts <<<"${!1}"
-  for o in "${opts[@]}"; do
+  IFS=, read -ra _opts <<<"${!1}"
+  for o in "${_opts[@]}"; do
     if optstring_match_option "$2" "$o"; then
       declare -g "$o"
       return 0
