@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2154 # optstring_*_option may export variables in runtime
 
 shopt -s extglob
 
@@ -43,18 +42,19 @@ write_source() {
 }
 
 optstring_apply_quirks() {
-  local varname="$1" fstype="$2"
+  local fstype="$2"
+  local -n _optstring="$1"
 
   # SELinux displays a 'seclabel' option in /proc/self/mountinfo. We can't know
   # if the system we're generating the fstab for has any support for SELinux (as
   # one might install Arch from a Fedora environment), so let's remove it.
-  optstring_remove_option "$varname" seclabel
+  optstring_remove_options _optstring seclabel
 
   # Prune 'relatime' option for any pseudofs. This seems to be a rampant
   # default which the kernel often exports even if the underlying filesystem
   # doesn't support it. Example: https://bugs.archlinux.org/task/54554.
   if fstype_is_pseudofs "$fstype"; then
-    optstring_remove_option "$varname" relatime
+    optstring_remove_options _optstring relatime
   fi
 
   case $fstype in
@@ -62,15 +62,15 @@ optstring_apply_quirks() {
       # Having only one of subvol= and subvolid= is enough for mounting a btrfs subvolume
       # And having subvolid= set prevents things like 'snapper rollback' to work, as it
       # updates the subvolume in-place, leaving subvol= unchanged with a different subvolid.
-      if optstring_has_option "$varname" subvol; then
-        optstring_remove_option "$varname" subvolid
+      if optstring_match_one_option _optstring subvol; then
+        optstring_remove_options _optstring subvolid
       fi
       ;;
     f2fs)
       # These are Kconfig options for f2fs. Kernels supporting the options will
       # only provide the negative versions of these (e.g. noacl), and vice versa
       # for kernels without support.
-      optstring_remove_option "$varname" noacl,acl,nouser_xattr,user_xattr
+      optstring_remove_options _optstring noacl,acl,nouser_xattr,user_xattr
       ;;
   esac
 }

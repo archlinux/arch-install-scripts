@@ -89,10 +89,12 @@ ignore_error() {
 
 in_array() {
   local i
+  local -n _arr="$1"
 
-  for i in "${@:2}"; do
-    [[ "$1" = "$i" ]] && return 0
+  for i in "${_arr[@]}"; do
+    [[ "$i" = "$1" ]] && return 0
   done
+
   return 1
 }
 
@@ -349,83 +351,99 @@ unmangle() {
   printf '%s' "$out${1:i}"
 }
 
-optstring_match_option() {
-  local candidate pat patterns
+optstring_match_one_option() {
+  local options=() target="$2"
+  local -n _optstring_match="$1"
 
-  IFS=, read -ra patterns <<<"$1"
-  for pat in "${patterns[@]}"; do
-    if [[ $pat = *'='* ]]; then
-      # "key=val" will only ever match "key=val"
-      candidate="$2"
-    else
-      # "key" will match "key", but also "key=anyval"
-      candidate="${2%%=*}"
-    fi
+  IFS=, read -ra options <<<"$_optstring_match"
+  if [[ "$target" != *'='* ]]; then
+    options=("${options[@]%%=*}")
+  fi
 
-    [[ "$pat" = "$candidate" ]] && return 0
-  done
-
-  return 1
+  in_array options "$target"
 }
 
-optstring_remove_option() {
-  local o _options remove="$2"
+optstring_get_options() {
+  local i options=()
+  local -n _ret="$1" _optstring_get="$2"
+  local -i got=0
 
-  IFS=, read -ra _options <<<"${!1}"
-  for o in "${!_options[@]}"; do
-    optstring_match_option "$remove" "${_options[o]}" && unset '_options[o]'
+  IFS=, read -ra options <<<"$_optstring_get"
+
+  shift 2
+  for i in "${!options[@]}"; do
+    if optstring_match_one_option 'options[i]' "$1"; then
+      _ret+=(["${options[i]%%=*}"]="${options[i]//*=}")
+      got=1
+    fi
+    shift || break
   done
 
-  declare -g "$1=${_options[*]}"
+  (( got ))
+}
+
+optstring_from_array() {
+  local optstring
+  local -n _optarray="$1"
+
+  optstring="$(printf ',%s' "${_optarray[@]}")"
+  optstring="${optstring:1}" # Remove the leading comma
+
+  printf '%s' "$optstring"
 }
 
 optstring_normalize() {
-  local o _options norm
+  local i options=()
+  local -n _optstring_norm="$1"
 
-  IFS=, read -ra _options <<<"${!1}"
+  IFS=, read -ra options <<<"$_optstring_norm"
+
   # remove empty fields
-  for o in "${_options[@]}"; do
-    [[ $o ]] && norm+=("$o")
+  for i in "${!options[@]}"; do
+    [[ ${options[i]} ]] || unset 'options[i]'
   done
 
   # avoid empty strings, reset to "defaults"
-  declare -g "$1=${norm[*]:-defaults}"
-}
-
-optstring_has_option() {
-  local o="${2%%=*}"
-
-  optstring_get_option "$1" "$o"
-}
-
-optstring_append_option() {
-  if ! optstring_has_option "$1" "$2"; then
-    declare -g "$1=${!1},$2"
+  if (( ! ${#options[@]} )); then
+    _optstring_norm="defaults"
+  else
+    _optstring_norm="$(optstring_from_array options)"
   fi
-
-  optstring_normalize "$1"
 }
 
-optstring_prepend_option() {
-  if ! optstring_has_option "$1" "$2"; then
-    declare -g "$1=$2,${!1}"
-  fi
+optstring_remove_options() {
+  local i options=() target="$2"
+  local -n _optstring_remove="$1"
 
-  optstring_normalize "$1"
-}
+  IFS=, read -ra options <<<"$_optstring_remove"
 
-optstring_get_option() {
-  local _opts o
-
-  IFS=, read -ra _opts <<<"${!1}"
-  for o in "${_opts[@]}"; do
-    if optstring_match_option "$2" "$o"; then
-      declare -g "$o"
-      return 0
-    fi
+  for i in "${!options[@]}"; do
+    optstring_match_one_option 'options[i]' "$target" && unset 'options[i]'
   done
 
-  return 1
+  _optstring_remove="$(optstring_from_array options)"
+}
+
+optstring_append_one_option() {
+  local option="$2"
+  local -n _optstring_append="$1"
+
+  if ! optstring_match_one_option _optstring_append "$option"; then
+    _optstring_append+=",$option"
+  fi
+
+  optstring_normalize _optstring_append
+}
+
+optstring_prepend_one_option() {
+  local option="$2"
+  local -n _optstring_prepend="$1"
+
+  if ! optstring_match_one_option _optstring_prepend "$option"; then
+    _optstring_prepend="$option,$_optstring_prepend"
+  fi
+
+  optstring_normalize _optstring_prepend
 }
 
 dm_name_for_devnode() {
