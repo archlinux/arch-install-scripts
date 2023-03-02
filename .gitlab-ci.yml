@@ -1,0 +1,6 @@
+shellcheck:
+    stage: test
+    image: koalaman/shellcheck-alpine:latest
+    script:
+      - shellcheck common
+      - shellcheck arch-chroot.in genfstab.in pacstrap.in
