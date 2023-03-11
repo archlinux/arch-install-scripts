@@ -67,10 +67,13 @@ optstring_apply_quirks() {
       fi
       ;;
     f2fs)
-      # These are Kconfig options for f2fs. Kernels supporting the options will
-      # only provide the negative versions of these (e.g. noacl), and vice versa
+      # These are build-time or runtime-unchangeable options for f2fs.
+      # The former means that kernels supporting the options will only
+      # provide the negative versions of these (e.g. noacl), and vice versa
       # for kernels without support.
-      optstring_remove_option "$varname" noacl,acl,nouser_xattr,user_xattr
+      # The latter means that the options can only be specified/changed
+      # during the initial mount but not remount.
+      optstring_remove_option "$varname" noacl,acl,nouser_xattr,user_xattr,atgc
       ;;
     vfat)
       # Before Linux v3.8, "cp" is prepended to the value of the codepage.
