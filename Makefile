@@ -25,7 +25,13 @@ _v_GEN_0 = @echo "  GEN     " $@;
 
 edit = $(V_GEN) m4 -P $@.in >$@ && chmod go-w,+x $@
 
-%: %.in common
+arch-chroot: arch-chroot.in common
+	$(edit)
+
+genfstab: genfstab.in fstab-helpers
+	$(edit)
+
+pacstrap: pacstrap.in common
 	$(edit)
 
 doc/%: doc/%.asciidoc doc/asciidoc.conf doc/footer.asciidoc

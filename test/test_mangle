@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. "${1:-./common}"
+. "${1:-./fstab-helpers}"
 . ./test/common
 
 ASSERT_streq ' deleted' "$(unmangle "$(mangle ' deleted')")"
