@@ -36,6 +36,10 @@ check: all
 	@for f in $(BINPROGS); do bash -O extglob -n $$f; done
 	@r=0; for t in test/test_*; do $(BASH) $$t || { echo $$t fail; r=1; }; done; exit $$r
 
+shellcheck: $(BINPROGS)
+	shellcheck -W 99 --color $(BINPROGS)
+	shellcheck -W 99 --color -x test/test_*
+
 install: all
 	install -dm755 $(DESTDIR)$(PREFIX)/bin
 	install -m755 $(BINPROGS) $(DESTDIR)$(PREFIX)/bin
@@ -47,4 +51,4 @@ install: all
 		install -Dm644 $$manfile -t $(DESTDIR)$(PREFIX)/share/man/man$${manfile##*.}; \
 	done;
 
-.PHONY: all man clean check install
+.PHONY: all man clean check shellcheck install
