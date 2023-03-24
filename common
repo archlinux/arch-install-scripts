@@ -124,7 +124,7 @@ chroot_add_mount_lazy() {
 
 chroot_bind_device() {
   touch "$2" && CHROOT_ACTIVE_FILES=("$2" "${CHROOT_ACTIVE_FILES[@]}")
-  chroot_add_mount $1 "$2" --bind
+  chroot_add_mount "$1" "$2" --bind
 }
 
 chroot_add_link() {
