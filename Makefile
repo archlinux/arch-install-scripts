@@ -13,6 +13,7 @@ MANS = \
 	doc/pacstrap.8
 
 BASH = bash
+BASHCOMP := $(wildcard completion/bash/*)
 
 all: $(BINPROGS) man
 man: $(MANS)
@@ -37,14 +38,13 @@ check: all
 	@r=0; for t in test/test_*; do $(BASH) $$t || { echo $$t fail; r=1; }; done; exit $$r
 
 install: all
-	install -dm755 $(DESTDIR)$(PREFIX)/bin
-	install -m755 $(BINPROGS) $(DESTDIR)$(PREFIX)/bin
-	install -Dm644 completion/_archinstallscripts.zsh $(DESTDIR)$(PREFIX)/share/zsh/site-functions/_archinstallscripts
-	cd completion; for comp in *.bash; do \
-		install -Dm644 $$comp $(DESTDIR)$(PREFIX)/share/bash-completion/completions/$${comp%%.*}; \
-	done;
-	for manfile in $(MANS); do \
-		install -Dm644 $$manfile -t $(DESTDIR)$(PREFIX)/share/man/man$${manfile##*.}; \
-	done;
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -m 0755 $(BINPROGS) $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/share/zsh/site-functions
+	install -m 0644 completion/zsh/_archinstallscripts $(DESTDIR)$(PREFIX)/share/zsh/site-functions
+	install -d $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+	install -m 0644 $(BASHCOMP) $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+	install -d $(DESTDIR)$(PREFIX)/share/man/man8
+	install -m 0644 $(MANS) $(DESTDIR)$(PREFIX)/share/man/man8
 
 .PHONY: all clean install uninstall
