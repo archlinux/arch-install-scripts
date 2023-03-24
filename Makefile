@@ -47,4 +47,4 @@ install: all
 		install -Dm644 $$manfile -t $(DESTDIR)$(PREFIX)/share/man/man$${manfile##*.}; \
 	done;
 
-.PHONY: all clean install uninstall
+.PHONY: all clean install
