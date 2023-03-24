@@ -47,6 +47,42 @@ are given, pacstrap defaults to the "base" group.
 EOF
 }
 
+pacstrap() {
+  (( EUID == 0 )) || die 'This script must be run with root privileges'
+
+  # create obligatory directories
+  msg 'Creating install root at %s' "$newroot"
+  mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc/pacman.d}
+  mkdir -m 1777 -p "$newroot"/tmp
+  mkdir -m 0555 -p "$newroot"/{sys,proc}
+
+  # mount API filesystems
+  $setup "$newroot" || die "failed to setup chroot %s" "$newroot"
+
+  if [[ ! -d $newroot/etc/pacman.d/gnupg ]]; then
+    if (( initkeyring )); then
+      pacman-key --gpgdir "$newroot"/etc/pacman.d/gnupg --init
+    elif (( copykeyring )) && [[ -d /etc/pacman.d/gnupg ]]; then
+      # if there's a keyring on the host, copy it into the new root
+      cp -a --no-preserve=ownership /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
+    fi
+  fi
+
+  msg 'Installing packages to %s' "$newroot"
+  if ! $pid_unshare pacman -r "$newroot" "${pacman_args[@]}"; then
+    die 'Failed to install packages to new root'
+  fi
+
+  if (( copymirrorlist )); then
+    # install the host's mirrorlist onto the new root
+    cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
+  fi
+
+  if (( copyconf )); then
+    cp -a "$pacman_config" "$newroot/etc/pacman.conf"
+  fi
+}
+
 if [[ -z $1 || $1 = @(-h|--help) ]]; then
   usage
   exit $(( $# ? 0 : 1 ))
@@ -108,42 +144,6 @@ if (( ! interactive )); then
 fi
 
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
-
-pacstrap() {
-  (( EUID == 0 )) || die 'This script must be run with root privileges'
-
-  # create obligatory directories
-  msg 'Creating install root at %s' "$newroot"
-  mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc/pacman.d}
-  mkdir -m 1777 -p "$newroot"/tmp
-  mkdir -m 0555 -p "$newroot"/{sys,proc}
-
-  # mount API filesystems
-  $setup "$newroot" || die "failed to setup chroot %s" "$newroot"
-
-  if [[ ! -d $newroot/etc/pacman.d/gnupg ]]; then
-    if (( initkeyring )); then
-      pacman-key --gpgdir "$newroot"/etc/pacman.d/gnupg --init
-    elif (( copykeyring )) && [[ -d /etc/pacman.d/gnupg ]]; then
-      # if there's a keyring on the host, copy it into the new root
-      cp -a --no-preserve=ownership /etc/pacman.d/gnupg "$newroot/etc/pacman.d/"
-    fi
-  fi
-
-  msg 'Installing packages to %s' "$newroot"
-  if ! $pid_unshare pacman -r "$newroot" "${pacman_args[@]}"; then
-    die 'Failed to install packages to new root'
-  fi
-
-  if (( copymirrorlist )); then
-    # install the host's mirrorlist onto the new root
-    cp -a /etc/pacman.d/mirrorlist "$newroot/etc/pacman.d/"
-  fi
-
-  if (( copyconf )); then
-    cp -a "$pacman_config" "$newroot/etc/pacman.conf"
-  fi
-}
 
 if (( unshare )); then
   $mount_unshare bash -c "$(declare_all); pacstrap"
