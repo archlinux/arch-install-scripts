@@ -26,8 +26,10 @@ EXPECT_success optstring_has_option optstring maxproto
 
 EXPECT_failure optstring_get_option optstring proto
 EXPECT_success optstring_get_option optstring maxproto
+# shellcheck disable=SC2154 # set via the optstring helper above
 ASSERT_streq "$maxproto" "5"
 EXPECT_success optstring_get_option optstring timeout
+# shellcheck disable=SC2154 # set via the optstring helper above
 ASSERT_streq "$timeout" "300"
 
 optstring_remove_option optstring pgrp
