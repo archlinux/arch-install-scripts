@@ -2,7 +2,6 @@
 
 shopt -s extglob
 
-setup=chroot_setup
 unshare=0
 
 m4_include(common)
@@ -99,7 +98,6 @@ while getopts ':hNu:' flag; do
       exit 0
       ;;
     N)
-      setup=unshare_setup
       unshare=1
       ;;
     u)
@@ -121,7 +119,9 @@ shift
 
 args=("$@")
 if (( unshare )); then
+  setup=unshare_setup
   $mount_unshare bash -c "$(declare_all); arch-chroot"
 else
+  setup=chroot_setup
   arch-chroot
 fi
