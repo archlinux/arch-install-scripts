@@ -16,7 +16,6 @@ initkeyring=0
 copymirrorlist=1
 pacman_args=()
 pacmode=-Sy
-setup=chroot_setup
 unshare=0
 copyconf=0
 pacman_config=/etc/pacman.conf
@@ -112,7 +111,6 @@ while getopts ':C:cDGiKMNPU' flag; do
       copymirrorlist=0
       ;;
     N)
-      setup=unshare_setup
       unshare=1
       ;;
     P)
@@ -146,8 +144,10 @@ fi
 [[ -d $newroot ]] || die "%s is not a directory" "$newroot"
 
 if (( unshare )); then
+  setup=unshare_setup
   $mount_unshare bash -c "$(declare_all); pacstrap"
 else
+  setup=chroot_setup
   pacstrap
 fi
 
