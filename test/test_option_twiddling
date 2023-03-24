@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. "${1:-./fstab-helpers}"
+. ./fstab-helpers
 . ./test/common
 
 optstring=rw,relatime,fd=29,pgrp=1,timeout=300,minproto=5,maxproto=5,direct
