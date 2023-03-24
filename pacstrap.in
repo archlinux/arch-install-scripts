@@ -130,7 +130,11 @@ done
 shift $(( OPTIND - 1 ))
 
 (( $# )) || die "No root directory specified"
-newroot=$1; shift
+newroot=$1
+shift
+
+[[ -d $newroot ]] || die "%s is not a directory" "$newroot"
+
 pacman_args+=("$pacmode" "${@:-base}" --config="$pacman_config")
 
 if (( ! hostcache )); then
@@ -140,8 +144,6 @@ fi
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
 fi
-
-[[ -d $newroot ]] || die "%s is not a directory" "$newroot"
 
 if (( unshare )); then
   setup=unshare_setup
