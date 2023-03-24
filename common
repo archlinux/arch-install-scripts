@@ -84,14 +84,6 @@ ignore_error() {
   return 0
 }
 
-in_array() {
-  local i
-  for i in "${@:2}"; do
-    [[ $1 = "$i" ]] && return 0
-  done
-  return 1
-}
-
 chroot_add_mount() {
   mount "$@" && CHROOT_ACTIVE_MOUNTS=("$2" "${CHROOT_ACTIVE_MOUNTS[@]}")
 }
