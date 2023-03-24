@@ -1,0 +1,36 @@
+#compdef arch-chroot
+
+_arch_chroot_args=( '-h[display help]' )
+
+_longopts=( '--help[display help]' )
+
+_arch_chroot(){
+    if [[ -z ${(M)words:#--help} && -z ${(M)words:#-*h} ]]; then
+        case $words[CURRENT] in
+            -*)
+                _arguments -s : \
+                    "$_arch_chroot_args[@]" \
+                    "$_longopts[@]" \
+                ;;
+            --*)
+                _arguments -s : \
+                    "$_longopts[@]"
+                ;;
+            *)
+                _arguments \
+                    ':*:_path_files -/'
+                ;;
+        esac
+    else
+        return 1
+    fi
+}
+
+_install_scripts(){
+    case "$service" in
+        arch-chroot)
+            _arch_chroot "$@";;
+    esac
+}
+
+_install_scripts "$@"

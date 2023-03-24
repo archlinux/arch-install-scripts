@@ -1,0 +1,51 @@
+#compdef genfstab
+
+_genfstab_args=(
+    '-h[display help]'
+)
+_genfstab_args_nonh=(
+    '(--help -h)-p[Avoid printing pseudofs mounts]'
+    '(-U --help -h)-L[Use labels for source identifiers]'
+    '(-L --help -h)-U[Use UUIDs for source identifiers]'
+)
+
+_longopts=( '--help[display help]' )
+
+_genfstab(){
+    if [[ -z ${(M)words:#--help} && -z ${(M)words:#-*h} ]]; then
+        case $words[CURRENT] in
+            -p*|-L*|-U*)
+                _arguments -s : \
+                    "$_genfstab_args_nonh[@]"
+                ;;
+            -*)
+                _arguments -s : \
+                    "$_genfstab_args[@]" \
+                    "$_genfstab_args_nonh[@]" \
+                    "$_longopts[@]"
+                ;;
+            --*)
+                _arguments -s : \
+                    "$_longopts[@]"
+                ;;
+            *)
+                _arguments \
+                    "$_genfstab_args[@]" \
+                    "$_genfstab_args_nonh[@]" \
+                    "$_longopts[@]" \
+                    ":*:_path_files -/"
+                ;;
+        esac
+    else
+        return 1
+    fi
+}
+
+_install_scripts(){
+    case "$service" in
+        genfstab)
+            _genfstab "$@";;
+    esac
+}
+
+_install_scripts "$@"

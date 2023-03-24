@@ -13,6 +13,7 @@ MANS = \
 	doc/pacstrap.8
 
 BASH = bash
+ZSHCOMP := $(wildcard completion/zsh/*)
 BASHCOMP := $(wildcard completion/bash/*)
 
 all: $(BINPROGS) man
@@ -41,7 +42,7 @@ install: all
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 $(BINPROGS) $(DESTDIR)$(PREFIX)/bin
 	install -d $(DESTDIR)$(PREFIX)/share/zsh/site-functions
-	install -m 0644 completion/zsh/_archinstallscripts $(DESTDIR)$(PREFIX)/share/zsh/site-functions
+	install -m 0644 $(ZSHCOMP) $(DESTDIR)$(PREFIX)/share/zsh/site-functions
 	install -d $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 	install -m 0644 $(BASHCOMP) $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 	install -d $(DESTDIR)$(PREFIX)/share/man/man8
