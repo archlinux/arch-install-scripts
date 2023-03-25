@@ -51,8 +51,11 @@ pacstrap() {
 
   # create obligatory directories
   msg 'Creating install root at %s' "$newroot"
+  # shellcheck disable=SC2174 # permissions are perfectly fine here
   mkdir -m 0755 -p "$newroot"/var/{cache/pacman/pkg,lib/pacman,log} "$newroot"/{dev,run,etc/pacman.d}
+  # shellcheck disable=SC2174 # permissions are perfectly fine here
   mkdir -m 1777 -p "$newroot"/tmp
+  # shellcheck disable=SC2174 # permissions are perfectly fine here
   mkdir -m 0555 -p "$newroot"/{sys,proc}
 
   # mount API filesystems
