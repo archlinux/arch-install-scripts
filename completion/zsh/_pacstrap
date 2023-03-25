@@ -5,8 +5,16 @@ _pacstrap_args=(
 )
 
 _pacstrap_args_nonh=(
-    '(-h --help)-c[Use the package cache on the host, rather than the target]'
-    '(--help -h)-i[Avoid auto-confirmation of package selections]'
+    '-C[Use an alternate config file for pacman]:config file:_files -/'
+    '-c[Use the package cache on the host, rather than the target]'
+    '-D[Skip pacman dependency checks]'
+    '-G[Avoid copying the host pacman keyring to the target]'
+    '-i[Prompt for package confirmation when needed (run interactively)]'
+    '-K[Initialize an empty pacman keyring in the target (implies -G)]'
+    '-M[Avoid copying the host mirrorlist to the target]'
+    '-N[Run in unshare mode as a regular user]'
+    '-P[Copy the host pacman config to the target]'
+    '-U[Use pacman -U to install packages]'
 )
 
 
