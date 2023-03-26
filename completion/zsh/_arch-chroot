@@ -1,0 +1,30 @@
+#compdef arch-chroot
+
+# NOTE: nearly everything here is borrowed from the chroot completion
+local -a args=(
+    '(-h --help)'{-h,--help}'[display help]'
+    '-N[Run in unshare mode as a regular user]'
+    '-u[The non-root user and optional group to use]: :->userspecs'
+    '1:new root directory:_directories'
+    '*:::command:_normal'
+)
+
+local ret=1
+
+_arguments $args && ret=0
+
+# @todo user:group specs are probably used often enough to justify making a type
+# function for this (see also `chown`, `cpio`, `rsync`, ...)
+
+[[ $state == userspecs ]] &&
+if compset -P '*:*:'; then
+  ret=1
+elif compset -P '*:'; then
+  _groups && ret=0
+elif compset -S ':*'; then
+  _users && ret=0
+else
+  _users -qS : && ret=0
+fi
+
+return ret

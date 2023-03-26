@@ -1,0 +1,13 @@
+#compdef genfstab
+
+local -a args=(
+    '(-h --help)'{-h,--help}'[display help]'
+    '-p[Avoid printing pseudofs mounts]'
+    '-f[Restrict output to mountpoints matching the prefix FILTER]'
+    '(-U -L)-t[Use TAG for source identifiers]:tag:(LABEL UUID PARTLABEL PARTUUID)'
+    '(-U -t)-L[Use labels for source identifiers]'
+    '(-L -t)-U[Use UUIDs for source identifiers]'
+    ':*:_path_files -/'
+)
+
+_arguments $args
