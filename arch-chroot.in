@@ -2,10 +2,10 @@
 
 shopt -s extglob
 
-m4_include(common)
-
 setup=chroot_setup
 unshare=0
+
+m4_include(common)
 
 usage() {
   cat <<EOF
