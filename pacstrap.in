@@ -10,8 +10,6 @@
 
 shopt -s extglob
 
-m4_include(common)
-
 hostcache=0
 copykeyring=1
 initkeyring=0
@@ -22,6 +20,8 @@ setup=chroot_setup
 unshare=0
 copyconf=0
 pacman_config=/etc/pacman.conf
+
+m4_include(common)
 
 usage() {
   cat <<EOF
