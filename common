@@ -72,6 +72,7 @@ declare -A fsck_types=([btrfs]=0    # btrfs doesn't need a regular fsck utility
                        [vfat]=1
                        [xfs]=1)
 
+# shellcheck disable=SC2059 # $1 and $2 can contain the printf modifiers
 out() { printf "$1 $2\n" "${@:3}"; }
 error() { out "==> ERROR:" "$@"; } >&2
 warning() { out "==> WARNING:" "$@"; } >&2
