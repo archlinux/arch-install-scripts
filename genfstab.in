@@ -149,8 +149,7 @@ if ! mountpoint -q "$root"; then
 fi
 
 # handle block devices
-findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
-    while read -r src target fstype opts fsroot; do
+while read -r src target fstype opts fsroot; do
   if (( !pseudofs )) && fstype_is_pseudofs "$fstype"; then
     continue
   fi
@@ -211,7 +210,7 @@ findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root" |
   printf '\t%-10s' "/$(mangle "${target#/}")" "$fstype" "$opts"
   printf '\t%s %s' "$dump" "$pass"
   printf '\n\n'
-done
+done < <(findmnt -Recvruno SOURCE,TARGET,FSTYPE,OPTIONS,FSROOT "$root")
 
 # handle swaps devices
 {

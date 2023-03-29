@@ -2,10 +2,9 @@
 
 shopt -s extglob
 
-m4_include(common)
-
-setup=chroot_setup
 unshare=0
+
+m4_include(common)
 
 usage() {
   cat <<EOF
@@ -74,6 +73,24 @@ chroot_add_resolv_conf() {
   chroot_add_mount "$src" "$dest" --bind
 }
 
+arch-chroot() {
+  (( EUID == 0 )) || die 'This script must be run with root privileges'
+
+  [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
+
+  $setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
+  chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
+
+  if ! mountpoint -q "$chrootdir"; then
+    warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
+  fi
+
+  chroot_args=()
+  [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
+
+  SHELL=/bin/bash $pid_unshare chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
+}
+
 while getopts ':hNu:' flag; do
   case $flag in
     h)
@@ -81,7 +98,6 @@ while getopts ':hNu:' flag; do
       exit 0
       ;;
     N)
-      setup=unshare_setup
       unshare=1
       ;;
     u)
@@ -101,27 +117,11 @@ shift $(( OPTIND - 1 ))
 chrootdir=$1
 shift
 
-arch-chroot() {
-  (( EUID == 0 )) || die 'This script must be run with root privileges'
-
-  [[ -d $chrootdir ]] || die "Can't create chroot on non-directory %s" "$chrootdir"
-
-  $setup "$chrootdir" || die "failed to setup chroot %s" "$chrootdir"
-  chroot_add_resolv_conf "$chrootdir" || die "failed to setup resolv.conf"
-
-  if ! mountpoint -q "$chrootdir"; then
-    warning "$chrootdir is not a mountpoint. This may have undesirable side effects."
-  fi
-
-  chroot_args=()
-  [[ $userspec ]] && chroot_args+=(--userspec "$userspec")
-
-  SHELL=/bin/bash $pid_unshare chroot "${chroot_args[@]}" -- "$chrootdir" "${args[@]}"
-}
-
 args=("$@")
 if (( unshare )); then
+  setup=unshare_setup
   $mount_unshare bash -c "$(declare_all); arch-chroot"
 else
+  setup=chroot_setup
   arch-chroot
 fi
