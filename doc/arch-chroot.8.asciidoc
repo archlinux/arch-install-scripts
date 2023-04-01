@@ -40,6 +40,10 @@ Options
 *-u <user>[:group]*::
 	Specify non-root user and optional group to use.
 
+*-r*::
+	Do not change the resolv.conf within the chroot. This means that the resolver
+	might not work in the chroot, which could be the required state.
+
 *-h*::
 	Output syntax and command line options.
 

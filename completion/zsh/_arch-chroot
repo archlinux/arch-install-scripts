@@ -5,6 +5,7 @@ local -a args=(
     '(-h --help)'{-h,--help}'[display help]'
     '-N[Run in unshare mode as a regular user]'
     '-u[The non-root user and optional group to use]: :->userspecs'
+    '-r[Do not change the resolv.conf within the chroot]'
     '1:new root directory:_directories'
     '*:::command:_normal'
 )
