@@ -143,6 +143,7 @@ fi
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
+  pacman_args+=(--overwrite='!*')
 fi
 
 if (( unshare )); then
