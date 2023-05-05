@@ -2,7 +2,7 @@
 
 shopt -s extglob
 
-m4_include(common)
+m4_include(fstab-helpers)
 
 write_source() {
   local src=$1 spec= label= uuid= comment=()

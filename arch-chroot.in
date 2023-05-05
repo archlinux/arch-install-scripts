@@ -47,8 +47,11 @@ resolve_link() {
 
 chroot_add_resolv_conf() {
   local chrootdir=$1
-  local src=$(resolve_link /etc/resolv.conf)
-  local dest=$(resolve_link "$chrootdir/etc/resolv.conf" "$chrootdir")
+  local src
+  local dest
+
+  src=$(resolve_link /etc/resolv.conf)
+  dest=$(resolve_link "$chrootdir/etc/resolv.conf" "$chrootdir")
 
   # If we don't have a source resolv.conf file, there's nothing useful we can do.
   [[ -e $src ]] || return 0

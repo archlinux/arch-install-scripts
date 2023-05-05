@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. "${1:-./common}"
+. ./fstab-helpers
 . ./test/common
 
 EXPECT_success valid_number_of_base 16 feedfacebeef

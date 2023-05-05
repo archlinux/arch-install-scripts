@@ -1,6 +1,27 @@
-shellcheck:
-    stage: test
-    image: koalaman/shellcheck-alpine:latest
+# SPDX-License-Identifier: GPL-2.0-only
+
+stages:
+    - check
+
+.pacman_install:
+    before_script:
+        # NOTE: Install latest archlinux-keyring before upgrading system. In the
+        # future this should not be needed anymore when we can guarantee a valid
+        # keyring for longer:
+        # https://gitlab.archlinux.org/archlinux/archlinux-keyring/-/issues/4
+        - echo -e "\e[0Ksection_start:`date +%s`:pacman[collapsed=true]\r\e[0KInstalling dependencies"
+        - pacman -Sy --needed --noconfirm archlinux-keyring
+        - pacman --noconfirm -Syu --needed asciidoc make shellcheck
+        - echo -e "\e[0Ksection_end:`date +%s`:pacman\r\e[0K"
+
+check:
+    stage: check
+    extends: .pacman_install
     script:
-      - shellcheck common
-      - shellcheck arch-chroot.in genfstab.in pacstrap.in
+        - make shellcheck
+
+test:
+    stage: check
+    extends: .pacman_install
+    script:
+        - make check
