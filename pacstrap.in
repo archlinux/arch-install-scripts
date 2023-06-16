@@ -18,6 +18,7 @@ pacman_args=()
 pacmode=-Sy
 unshare=0
 copyconf=0
+overwrite=0
 pacman_config=/etc/pacman.conf
 
 m4_include(common)
@@ -37,7 +38,7 @@ usage: ${0##*/} [options] root [packages...]
     -N             Run in unshare mode as a regular user
     -P             Copy the host's pacman config to the target
     -U             Use pacman -U to install packages
-
+    -O             Bypass file conflict checks and overwrite conflicting files
     -h             Print this help message
 
 pacstrap installs packages to the specified new root directory. If no packages
@@ -122,6 +123,9 @@ while getopts ':C:cDGiKMNPU' flag; do
     U)
       pacmode=-U
       ;;
+    O)
+      overwrite=1
+      ;;
     :)
       die '%s: option requires an argument -- '\''%s'\' "${0##*/}" "$OPTARG"
       ;;
@@ -146,6 +150,10 @@ fi
 
 if (( ! interactive )); then
   pacman_args+=(--noconfirm)
+fi
+
+if (( overwite  )); then
+  pacman_args+=(--overwrite='!*')
 fi
 
 if (( unshare )); then
