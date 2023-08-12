@@ -67,10 +67,10 @@ unshare_setup() {
   chroot_add_mount_lazy "$1" "$1" --bind &&
   chroot_add_mount proc "$1/proc" -t proc -o nosuid,noexec,nodev &&
   chroot_add_mount_lazy /sys "$1/sys" --rbind &&
-  chroot_add_link "$1/proc/self/fd" "$1/dev/fd" &&
-  chroot_add_link "$1/proc/self/fd/0" "$1/dev/stdin" &&
-  chroot_add_link "$1/proc/self/fd/1" "$1/dev/stdout" &&
-  chroot_add_link "$1/proc/self/fd/2" "$1/dev/stderr" &&
+  chroot_add_link /proc/self/fd "$1/dev/fd" &&
+  chroot_add_link /proc/self/fd/0 "$1/dev/stdin" &&
+  chroot_add_link /proc/self/fd/1 "$1/dev/stdout" &&
+  chroot_add_link /proc/self/fd/2 "$1/dev/stderr" &&
   chroot_bind_device /dev/full "$1/dev/full" &&
   chroot_bind_device /dev/null "$1/dev/null" &&
   chroot_bind_device /dev/random "$1/dev/random" &&
