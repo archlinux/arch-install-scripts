@@ -26,6 +26,7 @@ declare -A pseudofs_types=([anon_inodefs]=1
                            [fuse.gvfs-fuse-daemon]=1
                            [fuse.gvfsd-fuse]=1
                            [fuse.lxcfs]=1
+                           [fuse.portal]=1
                            [fuse.rofiles-fuse]=1
                            [fuse.vmware-vmblock]=1
                            [fuse.xwmfs]=1
